@@ -300,28 +300,32 @@ export const Collaborations: React.FC<CollaborationsProps> = ({ collaborations, 
       </div>
       
       <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-            {filterKeys.map(key => (
-                <div key={key}>
-                    <label htmlFor={`filter-${key}`} className="text-sm font-medium text-gray-700">{key}</label>
-                    <select
-                        id={`filter-${key}`}
-                        value={filters[key] || ''}
-                        onChange={(e) => handleFilterChange(key, e.target.value)}
-                        className="mt-1 block w-full p-2 border-gray-300 rounded-md shadow-sm text-sm"
-                    >
-                        <option value="">全部</option>
-                        {filterOptions[key]?.map(opt => {
-                           if (opt === '') {
-                               return <option key={EMPTY_VALUE_SENTINEL} value={EMPTY_VALUE_SENTINEL}>空</option>;
-                           }
-                           return <option key={opt} value={opt}>{opt}</option>;
-                        })}
-                    </select>
-                </div>
-            ))}
-            <div className="flex items-end">
-                 <button onClick={resetFilters} className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 text-sm">重置过滤</button>
+        <div className="flex flex-wrap items-center gap-4">
+            <div className="grid flex-grow grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                {filterKeys.map(key => (
+                    <div key={key} className="p-3 bg-gray-50 rounded-lg">
+                        <label htmlFor={`filter-${key}`} className="block text-center text-sm font-medium text-gray-600 mb-2">{key}</label>
+                        <select
+                            id={`filter-${key}`}
+                            value={filters[key] || ''}
+                            onChange={(e) => handleFilterChange(key, e.target.value)}
+                            className={`w-full p-2 border rounded-md shadow-sm text-sm focus:ring-indigo-500 focus:border-indigo-500 transition ${
+                                filters[key] ? 'bg-yellow-100 border-yellow-400' : 'bg-white border-gray-300'
+                            }`}
+                        >
+                            <option value="">全部</option>
+                            {filterOptions[key]?.map(opt => {
+                               if (opt === '') {
+                                   return <option key={EMPTY_VALUE_SENTINEL} value={EMPTY_VALUE_SENTINEL}>空</option>;
+                               }
+                               return <option key={opt} value={opt}>{opt}</option>;
+                            })}
+                        </select>
+                    </div>
+                ))}
+            </div>
+            <div className="flex-shrink-0">
+                 <button onClick={resetFilters} className="w-full bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 font-medium text-sm transition-colors whitespace-nowrap">重置过滤</button>
             </div>
         </div>
       </div>
