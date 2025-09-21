@@ -1,114 +1,85 @@
 # 综合工作台 (Comprehensive Workbench)
 
-## 1. 项目构思
+![React](https://img.shields.io/badge/React-19-blue?logo=react) ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript) ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.x-blue?logo=tailwindcss) ![Vite](https://img.shields.io/badge/Setup-No_Build-yellow)
 
-综合工作台是一款功能强大、一体化的办公管理应用，旨在完全在您的网页浏览器中运行。其核心理念是提供一个统一的平台，用于管理日常办公任务——从快速链接、出差管理到详细的销售引合和合同管理——而这一切都无需后端服务器、数据库或网络连接。
+一个功能强大、无需后端、完全在浏览器中运行的一体化办公管理平台。
 
-所有数据都安全、私密地存储在您浏览器的 **本地存储 (Local Storage)** 中。这种纯客户端的方案确保您的信息始终可用、响应极快，并且完全支持离线使用。它是一个由您掌控的个人生产力中心。
-
----
-
-## 2. 功能实现说明
-
-本应用采用模块化设计，构建为一个单页应用 (SPA)。每个功能都是一个独立的组件，它们协同工作，共同创造出一个集成的用户体验。
-
-### 核心模块:
-
-#### **导航与常用链接 (Dashboard)**
-- **功能:** 一个可定制的主页，用于存放您最常用的网站和内部系统链接。
-- **实现:** 用户可以添加、编辑和删除链接，每个链接都包含标题、URL和简介。数据以现代化的卡片布局进行展示，并包含CSV导出功能。
-
-#### **出差管理 (Business Trip Management)**
-- **功能:** 从出差申请到差旅报告的完整工作流管理。
-- **实现:** 用户可以创建包含目的地、事由等信息的出差申请。出差结束后，可以附上一份详细的报告，涵盖工作成果、遇到的问题及费用情况。
-
-#### **会议管理 (Meeting Management)**
-- **功能:** 一个功能丰富的、博客风格的界面，用于创建、查看和分享详细的会议纪要。
-- **实现:**
-  - **Markdown 编辑器:** 拥有一个全屏编辑器，并提供实时的分栏预览功能。
-  - **富文本内容:** 支持插入图片（通过将其转换为Base64格式）和从 `.md` 文件导入内容。
-  - **PDF 导出:** 可生成专业的、适合打印的A4格式PDF文档，包含适当的页边距和格式。
-
-#### **引合记录 (Inquiry Records)**
-- **功能:** 一个用于管理详细销售引合或合作记录的强大工具。
-- **实现:**
-  - **级联筛选:** 拥有一个智能的级联筛选系统。当在一个下拉菜单中选择一个选项（如“担当”）时，其他下拉菜单（如“地域”、“代理”）中的选项会智能地缩小范围。
-  - **数据联动:** 表单中的“担当”、“代理”、“機種”等字段，会从“基础数据”模块中读取数据并生成下拉菜单，以确保数据的一致性。
-  - **双格式导出:** 支持将筛选后的数据导出为 **CSV 和原生 Excel (.xlsx)** 两种格式。
-
-#### **合同管理 (Contract Management)**
-- **功能:** 一个专门用于跟踪和管理合同的模块。
-- **实现:** 复制了“引合记录”模块的高级功能，包括完整的增删改查界面、级联筛选、数据联动的下拉菜单以及CSV/Excel双格式导出能力。
-
-#### **基础数据 (Master Data)**
-- **功能:** 维护所有核心业务数据的中心枢纽，确保整个应用的数据一致性。
-- **实现:** 通过一个标签页界面，可以访问以下功能：
-  - **数据导入:** 一个强大、统一的CSV导入工具，具备针对特定类型的验证逻辑。它能提供详细的成功或失败反馈，确保数据完整性。
-  - **担当管理:** 管理员工的详细信息。“担当区域”字段是一个智能的多选输入框，它会根据现有的代理商区域提供建议，同时也允许手动输入新的区域。
-  - **代理商管理:** 管理详细的代理商列表。
-  - **产品管理:** 管理详细的产品目录。
-  - **客户管理:** 管理客户列表。
+<!-- 建议在此处添加一张应用截图，例如主仪表板的概览图 -->
+<!-- ![App Screenshot](https://example.com/screenshot.png) -->
 
 ---
 
-## 3. 技术栈
+## 目录 (Table of Contents)
 
-本应用采用现代Web技术构建，并采用**免构建**的设置，极大地简化了部署流程。
-
-- **前端:** React 19, TypeScript
-- **样式:** Tailwind CSS
-- **数据存储:** 浏览器本地存储 (通过自定义的 `useLocalStorage` Hook)
-- **文档生成:**
-  - **Excel:** [SheetJS/xlsx](https://sheetjs.com/)
-  - **PDF:** [jsPDF](https://github.com/parallax/jsPDF) & [html2canvas](https://html2canvas.hertzen.com/)
-- **Markdown 渲染:** [react-markdown](https://github.com/remarkjs/react-markdown) & [remark-gfm](https://github.com/remarkjs/remark-gfm)
+- [✨ 核心亮点 (Key Features)](#-核心亮点-key-features)
+- [🚀 快速开始 (Getting Started)](#-快速开始-getting-started)
+- [☁️ 部署指南 (Deployment)](#️-部署指南-deployment)
+- [🔒 数据持久化与隐私 (Data Persistence & Privacy)](#-数据持久化与隐私-data-persistence--privacy)
+- [🧩 功能模块详解 (Feature Breakdown)](#-功能模块详解-feature-breakdown)
+- [🛠️ 技术栈 (Technology Stack)](#️-技术栈-technology-stack)
+- [🗺️ 未来路线图 (Roadmap)](#️-未来路线图-roadmap)
 
 ---
 
-## 4. 部署说明
+## ✨ 核心亮点 (Key Features)
+
+*   **⚡️ 完全无后端:** 无需服务器、数据库或网络连接。所有功能均在客户端实现。
+*   **📂 本地数据存储:** 您的所有数据都安全地存储在浏览器的 `LocalStorage` 中，确保隐私和离线可用性。
+*   **🖥️ 响应式设计:** 界面在桌面和各种尺寸的设备上都能良好显示。
+*   **🔗 模块化功能:** 包括导航、出差、会议、引合、合同和基础数据管理。
+*   **✍️ 强大的编辑器:** 内置支持实时预览的 Markdown 编辑器，可插入图片并导出为 PDF。
+*   **📊 智能数据筛选:** 引合与合同模块具备级联筛选功能，简化数据查找过程。
+*   **📤 灵活的数据导入/导出:** 支持 CSV 和原生 Excel (.xlsx) 格式的数据导出，并提供强大的 CSV 数据导入及验证功能。
+
+---
+
+## 🚀 快速开始 (Getting Started)
 
 部署此应用非常简单，因为它只包含静态文件，**不需要任何构建步骤**。
 
-**重要提示:** 您不能直接在浏览器中通过本地文件系统打开 `index.html` 文件 (例如 `file:///...`)。由于浏览器关于 ES 模块的安全策略，这些文件**必须由一个Web服务器来提供服务**。
+**重要提示:** 由于浏览器的安全策略，您不能直接通过 `file:///...` 协议打开 `index.html`。文件**必须由一个 Web 服务器来提供服务**。
 
-### 方法一: 使用本地 Web 服务器 (最简单)
+这是在您本地计算机上运行的最简单方法：
 
-这是在您自己的计算机上供个人使用的推荐方法。
+1.  **准备文件:** 将所有应用文件放在同一个文件夹中。
 
-1.  **放置所有文件:** 将所有提供的应用文件（`index.html`, `index.tsx`, `App.tsx` 等）放在同一个文件夹中。
+2.  **启动本地服务器:** 打开终端，进入该文件夹，并运行以下命令之一：
 
-2.  **启动服务器:** 打开一个终端或命令提示符，进入该文件夹，并运行以下命令之一（取决于您的系统上安装了什么）：
+    *   **如果您有 Python 3:**
+        ```bash
+        python -m http.server
+        ```
+    *   **如果您有 Node.js/NPM:**
+        ```bash
+        npx serve
+        ```
 
-    - **如果您有 Python 3:**
-      ```bash
-      python -m http.server
-      ```
-    - **如果您有 Python 2:**
-      ```bash
-      python -m SimpleHTTPServer
-      ```
-    - **如果您有 Node.js/NPM:**
-      ```bash
-      npx serve
-      ```
+3.  **访问应用:** 打开浏览器并访问 [**http://localhost:8000**](http://localhost:8000) (或服务器提示的地址)。
 
-3.  **访问应用:** 打开您的网页浏览器并访问：
-    [**http://localhost:8000**](http://localhost:8000) (或服务器命令所指示的任何地址)。
+应用现已成功运行！
 
-现在应用就已经在运行了。您输入的所有数据都将保存在您浏览器中，与该特定地址关联。
+---
 
-### 方法二: 部署到静态托管服务
+## ☁️ 部署指南 (Deployment)
 
+除了快速开始的方法，您还可以选择以下方式进行部署：
+
+<details>
+<summary><strong>方法一: 部署到静态托管服务 (如 Vercel, Netlify)</strong></summary>
+
+<br>
 您可以轻松地将此应用免费托管在线上。
 
-1.  **选择一个提供商:** 像 [Vercel](https://vercel.com/), [Netlify](https://www.netlify.com/), 或 [GitHub Pages](https://pages.github.com/) 这样的服务都是绝佳的选择。
-
-2.  **上传文件:** 只需将文件夹中的所有应用文件上传到托管服务。无需配置“构建命令”。
-
+1.  **选择一个提供商:** [Vercel](https://vercel.com/), [Netlify](https://www.netlify.com/), 或 [GitHub Pages](https://pages.github.com/) 都是绝佳的选择。
+2.  **上传文件:** 只需将文件夹中的所有应用文件上传到托管服务。**无需配置“构建命令”**。
 3.  **完成:** 该服务会给您一个公开的URL，您可以从任何地方访问您的综合工作台。
+<br>
+</details>
 
-### 方法三: 使用 Docker 部署 (推荐)
+<details>
+<summary><strong>方法二: 使用 Docker 部署 (推荐)</strong></summary>
 
+<br>
 使用 Docker 是部署此应用的最佳实践，因为它提供了一个一致、隔离且可移植的运行环境。
 
 **前提条件:** 您的系统上必须已安装 [Docker](https://www.docker.com/get-started)。
@@ -137,38 +108,107 @@
     **b) `nginx.conf`**
     ```nginx
     server {
-        # 监听 80 端口
         listen 80;
-        
-        # 网站文件的根目录
         root /usr/share/nginx/html;
-
-        # 默认首页文件
         index index.html;
-
-        # 全局路由配置
         location / {
-            # 尝试按顺序查找文件：1. 请求的URI本身 ($uri) 2. 请求的URI作为一个目录 ($uri/) 3. 如果都找不到，则回退到 /index.html
-            # 这是支持 React Router 等前端路由的关键
             try_files $uri $uri/ /index.html;
         }
     }
     ```
 
-2.  **构建 Docker 镜像:** 打开终端，确保您位于项目文件夹中，然后运行以下命令来构建镜像：
+2.  **构建 Docker 镜像:**
     ```bash
     docker build -t comprehensive-workbench .
     ```
 
-3.  **运行 Docker 容器:** 构建成功后，使用以下命令来启动应用容器：
+3.  **运行 Docker 容器:**
     ```bash
     docker run -d -p 8080:80 --name my-workbench comprehensive-workbench
     ```
-    - `-d` 表示在后台运行容器。
-    - `-p 8080:80` 将您本地的 `8080` 端口映射到容器的 `80` 端口。
-    - `--name my-workbench` 为您的容器指定一个方便记忆的名称。
 
-4.  **访问应用:** 打开您的网页浏览器并访问：
-    [**http://localhost:8080**](http://localhost:8080)
+4.  **访问应用:** 打开浏览器并访问 [**http://localhost:8080**](http://localhost:8080)。
+<br>
+</details>
 
-您的应用现在正在 Docker 容器中稳定运行。
+---
+
+## 🔒 数据持久化与隐私 (Data Persistence & Privacy)
+
+本应用的核心设计理念是**您的数据完全归您所有**。
+
+*   **存储位置:** 所有数据，包括链接、报告、合同等，都存储在您当前使用的**浏览器的本地存储 (`LocalStorage`)** 中。
+*   **隐私:** 任何数据都**不会**被发送到任何外部服务器。它只存在于您的计算机上。
+*   **重要提示:**
+    *   如果您**清除浏览器缓存或站点数据**，本应用的所有数据都将被**永久删除**。
+    *   数据是与**来源 (Origin)** 绑定的。例如，在 `http://localhost:8000` 输入的数据将无法在 `http://localhost:8080` 或其他地址访问。
+    *   为了数据安全，建议定期使用各模块的导出功能（导出为 CSV 或 Excel）来**备份您的数据**。
+
+---
+
+## 🧩 功能模块详解 (Feature Breakdown)
+
+<details>
+<summary>点击展开/折叠各模块详细功能</summary>
+
+<br>
+
+### **导航与常用链接 (Dashboard)**
+- **功能:** 一个可定制的主页，用于存放您最常用的网站和内部系统链接。
+- **实现:** 用户可以添加、编辑和删除链接，每个链接都包含标题、URL和简介。数据以现代化的卡片布局进行展示，并包含CSV导出功能。
+
+### **出差管理 (Business Trip Management)**
+- **功能:** 从出差申请到差旅报告的完整工作流管理。
+- **实现:** 用户可以创建包含目的地、事由等信息的出差申请。出差结束后，可以附上一份详细的报告，涵盖工作成果、遇到的问题及费用情况。
+
+### **会议管理 (Meeting Management)**
+- **功能:** 一个功能丰富的、博客风格的界面，用于创建、查看和分享详细的会议纪要。
+- **实现:**
+  - **Markdown 编辑器:** 拥有一个全屏编辑器，并提供实时的分栏预览功能。
+  - **富文本内容:** 支持插入图片（通过将其转换为Base64格式）和从 `.md` 文件导入内容。
+  - **PDF 导出:** 可生成专业的、适合打印的A4格式PDF文档，包含适当的页边距和格式。
+
+### **引合记录 (Inquiry Records)**
+- **功能:** 一个用于管理详细销售引合或合作记录的强大工具。
+- **实现:**
+  - **级联筛选:** 拥有一个智能的级联筛选系统。当在一个下拉菜单中选择一个选项时，其他下拉菜单中的选项会智能地缩小范围。
+  - **数据联动:** 表单字段会从“基础数据”模块中读取数据并生成下拉菜单，确保数据一致性。
+  - **双格式导出:** 支持将筛选后的数据导出为 **CSV 和原生 Excel (.xlsx)** 两种格式。
+
+### **合同管理 (Contract Management)**
+- **功能:** 一个专门用于跟踪和管理合同的模块。
+- **实现:** 复制了“引合记录”模块的高级功能，包括级联筛选、数据联动以及CSV/Excel双格式导出能力。
+
+### **基础数据 (Master Data)**
+- **功能:** 维护所有核心业务数据的中心枢纽。
+- **实现:**
+  - **数据导入:** 一个强大、统一的CSV导入工具，具备验证逻辑并提供详细反馈。
+  - **担当管理:** 管理员工详细信息，并提供智能的区域标签输入。
+  - **代理商/产品/客户管理:** 提供完整的增删改查功能。
+
+<br>
+</details>
+
+---
+
+## 🛠️ 技术栈 (Technology Stack)
+
+- **前端:** React 19, TypeScript
+- **样式:** Tailwind CSS
+- **数据存储:** 浏览器本地存储 (通过自定义的 `useLocalStorage` Hook)
+- **文档生成:**
+  - **Excel:** [SheetJS/xlsx](https://sheetjs.com/)
+  - **PDF:** [jsPDF](https://github.com/parallax/jsPDF) & [html2canvas](https://html2canvas.hertzen.com/)
+- **Markdown 渲染:** [react-markdown](https://github.com/remarkjs/react-markdown) & [remark-gfm](https://github.com/remarkjs/remark-gfm)
+
+---
+
+## 🗺️ 未来路线图 (Roadmap)
+
+我们计划在未来添加更多功能，以进一步提升您的生产力：
+
+-   [ ] **数据备份与恢复:** 实现一键导出所有数据到单个加密文件，并能从中恢复。
+-   [ ] **主题切换:** 提供浅色/深色模式切换功能。
+-   [ ] **PWA 支持:** 将应用转化为渐进式网络应用 (PWA)，以获得更接近原生应用的体验和离线能力。
+-   [ ] **高级搜索:** 在所有模块中实现全局搜索功能。
+-   [ ] **可定制仪表盘:** 允许用户自定义仪表盘布局和展示的数据小组件。

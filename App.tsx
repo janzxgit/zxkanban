@@ -5,13 +5,14 @@ import type { Collaboration, Personnel, Agent, Product, Customer, Contract, Meet
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
+import { QuickLinks } from './components/QuickLinks';
 import { BusinessTrips } from './components/BusinessTrips';
 import { Meetings } from './components/Meetings';
 import { Collaborations } from './components/Collaborations';
 import { MasterData } from './components/MasterData';
 import { Contracts } from './components/Contracts';
 
-export type View = 'dashboard' | 'business-trips' | 'meetings' | 'collaborations' | 'contracts' | 'master-data';
+export type View = 'dashboard' | 'quick-links' | 'business-trips' | 'meetings' | 'collaborations' | 'contracts' | 'master-data';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('dashboard');
@@ -33,6 +34,8 @@ const App: React.FC = () => {
     switch (currentView) {
       case 'dashboard':
         return <Dashboard />;
+      case 'quick-links':
+        return <QuickLinks />;
       case 'business-trips':
         return <BusinessTrips />;
       case 'meetings':

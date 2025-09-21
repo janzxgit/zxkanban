@@ -10,7 +10,7 @@ const initialContractState: Omit<Contract, 'id'> = {
     '備考①': '', '備考②': '',
 };
 
-const contractFields: { key: keyof Omit<Contract, 'id'>; label: string; type: 'text' | 'date' | 'textarea' | 'number' | 'select' }[] = [
+const contractFields: { key: keyof Omit<Contract, 'id'>; label: string; type: 'text' | 'date' | 'textarea' | 'number' | 'select' | 'combobox' }[] = [
     { key: '契約書NO', label: '契約書NO', type: 'text' },
     { key: '担当', label: '担当', type: 'select' },
     { key: '代理名称', label: '代理名称', type: 'select' },
@@ -18,7 +18,7 @@ const contractFields: { key: keyof Omit<Contract, 'id'>; label: string; type: 't
     { key: '区分', label: '区分', type: 'text' },
     { key: '機号', label: '機号', type: 'text' },
     { key: '契約日', label: '契約日', type: 'date' },
-    { key: '契約状態', label: '契約状態', type: 'text' },
+    { key: '契約状態', label: '契約状態', type: 'combobox' },
     { key: '出荷指示書№', label: '出荷指示書№', type: 'text' },
     { key: '契約日付', label: '契約日付', type: 'date' },
     { key: '単価', label: '単価', type: 'number' },
@@ -121,6 +121,11 @@ export const Contracts: React.FC<ContractsProps> = ({ contracts, setContracts, p
         });
         return options;
     }, [contracts, filters]);
+    
+    const contractStatusOptions = useMemo(() => {
+        const allStatuses = contracts.map(c => c.契約状態).filter(Boolean);
+        return [...new Set(['', '契約ずみ', '貸出契約', ...allStatuses])].sort();
+    }, [contracts]);
 
 
     const handleFilterChange = (key: keyof Contract, value: string) => {
@@ -202,6 +207,18 @@ export const Contracts: React.FC<ContractsProps> = ({ contracts, setContracts, p
             onChange: handleInputChange,
             className: "mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
         };
+
+        if (type === 'combobox') {
+            const datalistId = `${key}-datalist`;
+            return (
+                <>
+                    <input list={datalistId} {...commonProps} />
+                    <datalist id={datalistId}>
+                        {contractStatusOptions.map(opt => <option key={opt} value={opt} />)}
+                    </datalist>
+                </>
+            );
+        }
 
         if (type === 'select') {
             let options: { value: string; label: string; }[] = [];
