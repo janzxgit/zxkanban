@@ -11,26 +11,26 @@ const initialCollaborationState: Omit<Collaboration, 'id'> = {
     '備考①引合詳細、補充内容': '', '備考②引合状況変化記録等': '', '備考③': '',
 };
 
-const collaborationFields: { key: keyof Omit<Collaboration, 'id'>; label: string; type: 'text' | 'date' | 'textarea' | 'number' | 'select' }[] = [
-    { key: '引合番号', label: '引合番号', type: 'text' }, 
-    { key: '担当', label: '担当', type: 'select' },
-    { key: '地域', label: '地域', type: 'text' }, 
-    { key: '代理', label: '代理', type: 'select' },
-    { key: '機種', label: '機種', type: 'select' }, 
-    { key: '台数', label: '台数', type: 'number' },
-    { key: '顧客情報', label: '顧客情報', type: 'select' }, 
-    { key: '案件発生年月', label: '案件発生年月', type: 'date' },
-    { key: '访问方式', label: '访问方式', type: 'text' }, 
-    { key: '訪問回数', label: '訪問回数', type: 'number' },
-    { key: '確度', label: '確度', type: 'text' }, 
-    { key: '確度変更', label: '確度変更', type: 'text' },
-    { key: '確度変更理由', label: '確度変更理由', type: 'textarea' }, 
-    { key: '出荷可能時期', label: '出荷可能時期', type: 'date' },
-    { key: '最終結果', label: '最終結果', type: 'text' }, 
-    { key: '出荷日(実際）', label: '出荷日(実際）', type: 'date' },
-    { key: '備考①引合詳細、補充内容', label: '備考①引合詳細、補充内容', type: 'textarea' },
-    { key: '備考②引合状況変化記録等', label: '備考②引合状況変化記録等', type: 'textarea' },
-    { key: '備考③', label: '備考③', type: 'textarea' },
+const collaborationFields: { key: keyof Omit<Collaboration, 'id'>; label: string; type: 'text' | 'date' | 'textarea' | 'number' | 'select'; gridSpan: string; }[] = [
+    { key: '引合番号', label: '引合番号', type: 'text', gridSpan: 'md:col-span-2' }, 
+    { key: '担当', label: '担当', type: 'select', gridSpan: 'md:col-span-2' },
+    { key: '地域', label: '地域', type: 'text', gridSpan: 'md:col-span-2' }, 
+    { key: '代理', label: '代理', type: 'select', gridSpan: 'md:col-span-3' },
+    { key: '機種', label: '機種', type: 'select', gridSpan: 'md:col-span-3' }, 
+    { key: '台数', label: '台数', type: 'number', gridSpan: 'md:col-span-1' },
+    { key: '訪問回数', label: '訪問回数', type: 'number', gridSpan: 'md:col-span-1' },
+    { key: '案件発生年月', label: '案件発生年月', type: 'date', gridSpan: 'md:col-span-2' },
+    { key: '出荷可能時期', label: '出荷可能時期', type: 'date', gridSpan: 'md:col-span-2' },
+    { key: '確度', label: '確度', type: 'text', gridSpan: 'md:col-span-1' }, 
+    { key: '確度変更', label: '確度変更', type: 'text', gridSpan: 'md:col-span-1' },
+    { key: '访问方式', label: '访问方式', type: 'text', gridSpan: 'md:col-span-2' }, 
+    { key: '最終結果', label: '最終結果', type: 'text', gridSpan: 'md:col-span-2' }, 
+    { key: '出荷日(実際）', label: '出荷日(実際）', type: 'date', gridSpan: 'md:col-span-2' },
+    { key: '顧客情報', label: '顧客情報', type: 'select', gridSpan: 'md:col-span-6' },
+    { key: '確度変更理由', label: '確度変更理由', type: 'textarea', gridSpan: 'md:col-span-6' }, 
+    { key: '備考①引合詳細、補充内容', label: '備考①', type: 'textarea', gridSpan: 'md:col-span-6' },
+    { key: '備考②引合状況変化記録等', label: '備考②', type: 'textarea', gridSpan: 'md:col-span-6' },
+    { key: '備考③', label: '備考③', type: 'textarea', gridSpan: 'md:col-span-6' },
 ];
 
 const displayColumns: (keyof Collaboration)[] = ['引合番号', '担当', '地域', '代理', '機種', '台数', '顧客情報', '確度', '出荷可能時期', '最終結果', '出荷日(実際）', '備考①引合詳細、補充内容', '備考②引合状況変化記録等'];
@@ -78,6 +78,8 @@ const exportToCSV = (data: any[], headers: string[], filename: string) => {
     }
 };
 
+const commonInputClasses = "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm";
+const commonLabelClasses = "block text-sm font-medium text-gray-700 mb-1";
 
 interface CollaborationsProps {
     collaborations: Collaboration[];
@@ -176,19 +178,21 @@ export const Collaborations: React.FC<CollaborationsProps> = ({ collaborations, 
       alert('引合番号 is required.');
       return;
     }
-    if (editingId) {
-      setCollaborations(collaborations.map(c => c.id === editingId ? { ...currentCollaboration, id: editingId } : c));
-    } else {
-      setCollaborations([...collaborations, { ...currentCollaboration, id: crypto.randomUUID() }]);
-    }
+    setCollaborations(prev => {
+        if (editingId) {
+            return prev.map(c => c.id === editingId ? { ...currentCollaboration, id: editingId } : c);
+        } else {
+            return [...prev, { ...currentCollaboration, id: crypto.randomUUID() }];
+        }
+    });
     setView('list');
   };
 
   const handleDeleteSelected = () => {
     if (selectedIds.size === 0) return;
     if (window.confirm(`Are you sure you want to delete ${selectedIds.size} record(s)?`)) {
-      setCollaborations(collaborations.filter(c => !selectedIds.has(c.id)));
-      setSelectedIds(new Set());
+        setCollaborations(prev => prev.filter(c => !selectedIds.has(c.id)));
+        setSelectedIds(new Set());
     }
   };
   
@@ -201,13 +205,13 @@ export const Collaborations: React.FC<CollaborationsProps> = ({ collaborations, 
     exportToCSV(filteredCollaborations, headers, 'collaborations.csv');
   };
 
-  const renderFormField = ({ key, label, type }: (typeof collaborationFields)[0]) => {
+  const renderFormField = ({ key, type }: { key: keyof Omit<Collaboration, 'id'>, type: string }) => {
     const commonProps = {
         id: key,
         name: key,
         value: currentCollaboration[key] || '',
         onChange: handleInputChange,
-        className: "mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+        className: commonInputClasses
     };
 
     if (type === 'select') {
@@ -245,28 +249,25 @@ export const Collaborations: React.FC<CollaborationsProps> = ({ collaborations, 
 
   if (view === 'edit') {
     return (
-      <div>
-        <div className="flex justify-between items-center mb-6">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-6 pb-4 border-b">
           <h2 className="text-3xl font-bold text-gray-800">{editingId ? '编辑引合记录' : '新建引合记录'}</h2>
           <button onClick={() => setView('list')} className="flex items-center bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
             <ArrowLeftIcon className="w-5 h-5 mr-2" />
             返回列表
           </button>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-            {collaborationFields.map((field) => {
-                const fullWidth = field.type === 'textarea' || ['顧客情報', '備考①引合詳細、補充内容', '備考②引合状況変化記録等', '備考③'].includes(field.key);
-                return (
-                    <div key={field.key} className={fullWidth ? 'md:col-span-2 lg:col-span-3' : ''}>
-                        <label htmlFor={field.key} className="block text-sm font-medium text-gray-700">{field.label}</label>
-                        {renderFormField(field)}
-                    </div>
-                );
-            })}
+        <div className="bg-white p-8 rounded-lg shadow">
+          <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+            {collaborationFields.map((field) => (
+                <div key={field.key} className={field.gridSpan}>
+                    <label htmlFor={field.key} className={commonLabelClasses}>{field.label}</label>
+                    {renderFormField(field)}
+                </div>
+            ))}
           </div>
-          <div className="flex justify-end pt-6">
-            <button onClick={handleSubmit} className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">保存</button>
+          <div className="flex justify-end pt-8 mt-8 border-t">
+            <button onClick={handleSubmit} className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">保存</button>
           </div>
         </div>
       </div>
@@ -275,7 +276,7 @@ export const Collaborations: React.FC<CollaborationsProps> = ({ collaborations, 
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4 pb-4 border-b">
         <h2 className="text-3xl font-bold text-gray-800">引合记录管理</h2>
         <div className="flex items-center space-x-2">
             <button onClick={handleCsvExport} className="flex items-center bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
@@ -338,7 +339,7 @@ export const Collaborations: React.FC<CollaborationsProps> = ({ collaborations, 
                 <input type="checkbox" onChange={handleSelectAll} checked={selectedIds.size > 0 && selectedIds.size === filteredCollaborations.length} className="rounded" />
               </th>
               {displayColumns.map(key => (
-                <th key={key} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">{key}</th>
+                <th key={key} className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{key}</th>
               ))}
             </tr>
           </thead>
@@ -349,7 +350,7 @@ export const Collaborations: React.FC<CollaborationsProps> = ({ collaborations, 
                   <input type="checkbox" checked={selectedIds.has(collab.id)} onChange={() => handleSelect(collab.id)} className="rounded" />
                 </td>
                 {displayColumns.map(key => (
-                  <td key={key} className="px-4 py-4 whitespace-nowrap text-sm text-gray-600 truncate max-w-xs">{collab[key]}</td>
+                  <td key={key} className="px-4 py-4 text-sm text-gray-600 whitespace-normal break-words">{collab[key]}</td>
                 ))}
               </tr>
             ))}

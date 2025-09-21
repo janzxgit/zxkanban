@@ -46,14 +46,14 @@ export const QuickLinks: React.FC = () => {
 
   const handleAddLink = () => {
     if (newLink.title && newLink.url) {
-      setLinks([...links, { ...newLink, id: crypto.randomUUID() }]);
+      setLinks(prev => [...prev, { ...newLink, id: crypto.randomUUID() }]);
       setNewLink({ title: '', url: '', description: '' });
       setIsModalOpen(false);
     }
   };
 
   const handleDeleteLink = (id: string) => {
-    setLinks(links.filter(link => link.id !== id));
+    setLinks(prev => prev.filter(link => link.id !== id));
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -68,7 +68,7 @@ export const QuickLinks: React.FC = () => {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 pb-4 border-b">
         <h2 className="text-3xl font-bold text-gray-800">常用链接</h2>
         <div className="flex items-center space-x-2">
             <button
@@ -121,40 +121,40 @@ export const QuickLinks: React.FC = () => {
       )}
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="添加新链接">
-        <div className="space-y-4">
+        <div className="space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700">标题</label>
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">标题</label>
             <input
               type="text"
               name="title"
               id="title"
               value={newLink.title}
               onChange={handleInputChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               placeholder="例如：公司内网"
             />
           </div>
           <div>
-            <label htmlFor="url" className="block text-sm font-medium text-gray-700">URL</label>
+            <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-1">URL</label>
             <input
               type="text"
               name="url"
               id="url"
               value={newLink.url}
               onChange={handleInputChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               placeholder="https://example.com"
             />
           </div>
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700">简介</label>
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">简介</label>
             <textarea
               name="description"
               id="description"
               rows={3}
               value={newLink.description}
               onChange={handleInputChange}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+              className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
               placeholder="关于这个链接的简短说明"
             />
           </div>

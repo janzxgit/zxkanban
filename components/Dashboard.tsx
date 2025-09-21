@@ -4,7 +4,7 @@ import { BriefcaseIcon, UserGroupIcon, DocumentTextIcon } from './common/Icons';
 export const Dashboard: React.FC = () => {
   return (
     <div>
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">仪表盘</h2>
+      <h2 className="text-3xl font-bold text-gray-800 mb-6 pb-4 border-b">仪表盘</h2>
       <div className="bg-white p-6 rounded-lg shadow mb-6">
         <h3 className="text-xl font-semibold text-gray-700">欢迎回来!</h3>
         <p className="text-gray-500 mt-2">这是您的综合工作台。从左侧的侧边栏选择一个模块开始，或查看下面的摘要。</p>

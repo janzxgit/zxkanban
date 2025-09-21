@@ -14,6 +14,9 @@ const initialMeetingState: Omit<Meeting, 'id'> = {
   minutes: '',
 };
 
+const commonInputClasses = "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm";
+const commonLabelClasses = "block text-sm font-medium text-gray-700 mb-1";
+
 const exportToCSV = (data: any[], headers: string[], filename: string) => {
     const escapeCSVValue = (value: any): string => {
         if (value === null || value === undefined) {
@@ -85,16 +88,18 @@ export const Meetings: React.FC<MeetingsProps> = ({ personnel }) => {
     if (!currentMeeting || !currentMeeting.title || !currentMeeting.date) return;
     const finalMeeting = { ...currentMeeting, minutes: editingMinutes };
     
-    if (meetings.some(m => m.id === finalMeeting.id)) {
-        setMeetings(meetings.map(m => m.id === finalMeeting.id ? finalMeeting : m));
-    } else {
-        setMeetings([...meetings, { ...finalMeeting, id: crypto.randomUUID() }]);
-    }
+    setMeetings(prev => {
+        if (finalMeeting.id) {
+            return prev.map(m => m.id === finalMeeting.id ? finalMeeting : m);
+        } else {
+            return [...prev, { ...finalMeeting, id: crypto.randomUUID() }];
+        }
+    });
     setView('list');
   };
 
   const handleDelete = (id: string) => {
-    setMeetings(meetings.filter(m => m.id !== id));
+    setMeetings(prev => prev.filter(m => m.id !== id));
     setView('list');
   };
   
@@ -179,7 +184,7 @@ export const Meetings: React.FC<MeetingsProps> = ({ personnel }) => {
 
   const renderListView = () => (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6 pb-4 border-b">
         <h2 className="text-3xl font-bold text-gray-800">会议管理</h2>
         <div className="flex items-center space-x-2">
             <button onClick={handleExportAllToCSV} className="flex items-center bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
@@ -216,10 +221,10 @@ export const Meetings: React.FC<MeetingsProps> = ({ personnel }) => {
   );
   
   const renderReadView = () => (
-    <div>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">{currentMeeting?.title}</h2>
-          <div className="flex items-center space-x-2">
+    <div className="max-w-5xl mx-auto">
+        <div className="flex justify-between items-center mb-6 pb-4 border-b">
+          <h2 className="text-2xl font-bold text-gray-800 truncate" title={currentMeeting?.title}>{currentMeeting?.title}</h2>
+          <div className="flex items-center space-x-2 flex-shrink-0 ml-4">
             <button onClick={handleExportToPDF} className="flex items-center bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
                 <PrinterIcon className="w-5 h-5 mr-2" />
                 导出PDF
@@ -237,7 +242,7 @@ export const Meetings: React.FC<MeetingsProps> = ({ personnel }) => {
                     <p className="text-gray-500 mt-2">日期: {currentMeeting?.date}</p>
                     <p className="text-gray-500">参会: {currentMeeting?.attendees}</p>
                 </div>
-                <article className="prose prose-xl">
+                <article className="prose prose-xl max-w-none">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{currentMeeting?.minutes || ''}</ReactMarkdown>
                 </article>
             </div>
@@ -246,8 +251,8 @@ export const Meetings: React.FC<MeetingsProps> = ({ personnel }) => {
   );
 
   const renderEditView = () => (
-    <div>
-      <div className="flex justify-between items-center mb-6">
+    <div className="max-w-5xl mx-auto">
+      <div className="flex justify-between items-center mb-6 pb-4 border-b">
         <h2 className="text-3xl font-bold text-gray-800">{currentMeeting?.id ? '编辑会议纪要' : '新建会议纪要'}</h2>
         <div className="flex items-center space-x-2">
             <button onClick={() => setView('list')} className="flex items-center bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
@@ -259,37 +264,37 @@ export const Meetings: React.FC<MeetingsProps> = ({ personnel }) => {
             </button>
         </div>
       </div>
-      <div className="bg-white p-6 rounded-lg shadow mb-6">
+      <div className="bg-white p-8 rounded-lg shadow mb-6 space-y-6">
+        <div>
+            <label htmlFor="title" className={commonLabelClasses}>会议主题</label>
+            <input id="title" value={currentMeeting?.title} onChange={e => setCurrentMeeting(m => m ? {...m, title: e.target.value} : null)} className={commonInputClasses}/>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700">会议主题</label>
-            <input id="title" value={currentMeeting?.title} onChange={e => setCurrentMeeting(m => m ? {...m, title: e.target.value} : null)} className="mt-1 w-full p-2 border rounded"/>
-          </div>
-          <div>
-            <label htmlFor="date" className="block text-sm font-medium text-gray-700">会议日期</label>
-            <input id="date" type="date" value={currentMeeting?.date} onChange={e => setCurrentMeeting(m => m ? {...m, date: e.target.value} : null)} className="mt-1 w-full p-2 border rounded"/>
-          </div>
-          <div className="md:col-span-2">
-            <label htmlFor="attendees" className="block text-sm font-medium text-gray-700">参会人员</label>
-            <textarea id="attendees" value={currentMeeting?.attendees} onChange={e => setCurrentMeeting(m => m ? {...m, attendees: e.target.value} : null)} rows={2} className="mt-1 w-full p-2 border rounded"/>
+            <div>
+                <label htmlFor="date" className={commonLabelClasses}>会议日期</label>
+                <input id="date" type="date" value={currentMeeting?.date} onChange={e => setCurrentMeeting(m => m ? {...m, date: e.target.value} : null)} className={commonInputClasses}/>
+            </div>
+        </div>
+        <div>
+            <label htmlFor="attendees" className={commonLabelClasses}>参会人员</label>
+            <textarea id="attendees" value={currentMeeting?.attendees} onChange={e => setCurrentMeeting(m => m ? {...m, attendees: e.target.value} : null)} rows={2} className={commonInputClasses}/>
              {personnel.length > 0 && (
-                <div className="mt-1 text-xs text-gray-500">
-                    <p>可用人员 (点击添加):</p>
-                    <div className="flex flex-wrap gap-1 mt-1">
+                <div className="mt-2 text-xs text-gray-500">
+                    <p className="font-medium mb-1">可用人员 (点击添加):</p>
+                    <div className="flex flex-wrap gap-1">
                         {personnel.map(p => 
                             <button key={p.id} onClick={() => setCurrentMeeting(m => {
                                 if (!m) return null;
-                                const attendees = m.attendees ? m.attendees.split(',').map(s => s.trim()) : [];
+                                const attendees = m.attendees ? m.attendees.split(',').map(s => s.trim()).filter(Boolean) : [];
                                 if (!attendees.includes(p.name)) {
                                     attendees.push(p.name);
                                 }
                                 return {...m, attendees: attendees.join(', ')}
-                            })} className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full hover:bg-gray-300">{p.name}</button>
+                            })} className="bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full hover:bg-gray-300 transition-colors">{p.name}</button>
                         )}
                     </div>
                 </div>
             )}
-          </div>
         </div>
       </div>
       <div className="bg-white rounded-lg shadow">
@@ -305,7 +310,7 @@ export const Meetings: React.FC<MeetingsProps> = ({ personnel }) => {
                 插入图片
             </label>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 h-[60vh]">
+        <div className="grid grid-cols-1 md:grid-cols-2 h-[60vh] border-t">
             <textarea 
                 ref={editorTextareaRef}
                 value={editingMinutes}

@@ -83,6 +83,9 @@ const parseCSV = (text: string): string[][] => {
   return result.filter(line => line.length > 1 || (line.length === 1 && line[0] !== ''));
 };
 
+const commonInputClasses = "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm";
+const commonLabelClasses = "block text-sm font-medium text-gray-700 mb-1";
+
 
 // --- DATA IMPORTER ---
 type ImportType = 'collaborations' | 'contracts' | 'agents' | 'products' | 'customers';
@@ -222,9 +225,9 @@ const PersonnelManager: React.FC<{
     const handleSave = () => {
         if (!currentItem.name) return;
         if (editingItem) {
-            setPersonnel(personnel.map(p => p.id === editingItem.id ? { ...currentItem, id: editingItem.id } : p));
+            setPersonnel(prev => prev.map(p => p.id === editingItem.id ? { ...currentItem, id: editingItem.id } : p));
         } else {
-            setPersonnel([...personnel, { ...currentItem, id: crypto.randomUUID() }]);
+            setPersonnel(prev => [...prev, { ...currentItem, id: crypto.randomUUID() }]);
         }
         setIsModalOpen(false);
     };
@@ -260,7 +263,7 @@ const PersonnelManager: React.FC<{
         };
 
         return (
-            <div className="flex flex-wrap gap-2 p-2 border border-gray-300 rounded-md min-h-[40px] mt-1">
+            <div className={`flex flex-wrap gap-2 p-2 rounded-md min-h-[42px] mt-1 ${commonInputClasses}`}>
                 {value.map(tag => (
                     <div key={tag} className="flex items-center bg-indigo-100 text-indigo-800 text-sm font-medium px-2 py-1 rounded-full">
                         {tag}
@@ -308,31 +311,31 @@ const PersonnelManager: React.FC<{
                         </div>
                         <div>
                             <button onClick={() => handleOpenModal(p)} className="text-gray-400 hover:text-blue-500 mr-2"><PencilIcon className="w-5 h-5" /></button>
-                            <button onClick={() => setPersonnel(personnel.filter(i => i.id !== p.id))} className="text-gray-400 hover:text-red-500"><TrashIcon className="w-5 h-5" /></button>
+                            <button onClick={() => setPersonnel(prev => prev.filter(i => i.id !== p.id))} className="text-gray-400 hover:text-red-500"><TrashIcon className="w-5 h-5" /></button>
                         </div>
                     </div>
                 ))}
             </div>
              <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingItem ? "编辑担当" : "添加担当"}>
-                <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label htmlFor="personnel-name" className="block text-sm font-medium text-gray-700">姓名</label>
-                        <input id="personnel-name" value={currentItem.name} onChange={e => setCurrentItem(c => ({...c, name: e.target.value}))} placeholder="姓名" className="mt-1 w-full p-2 border rounded"/>
+                        <label htmlFor="personnel-name" className={commonLabelClasses}>姓名</label>
+                        <input id="personnel-name" value={currentItem.name} onChange={e => setCurrentItem(c => ({...c, name: e.target.value}))} placeholder="姓名" className={commonInputClasses}/>
                     </div>
                     <div>
-                        <label htmlFor="personnel-position" className="block text-sm font-medium text-gray-700">职位</label>
-                        <input id="personnel-position" value={currentItem.position} onChange={e => setCurrentItem(c => ({...c, position: e.target.value}))} placeholder="职位" className="mt-1 w-full p-2 border rounded"/>
+                        <label htmlFor="personnel-position" className={commonLabelClasses}>职位</label>
+                        <input id="personnel-position" value={currentItem.position} onChange={e => setCurrentItem(c => ({...c, position: e.target.value}))} placeholder="职位" className={commonInputClasses}/>
                     </div>
-                    <div>
-                        <label htmlFor="personnel-birthdate" className="block text-sm font-medium text-gray-700">出生年月日</label>
-                        <input id="personnel-birthdate" type="date" value={currentItem.birthdate} onChange={e => setCurrentItem(c => ({...c, birthdate: e.target.value}))} className="mt-1 w-full p-2 border rounded"/>
+                    <div className="md:col-span-2">
+                        <label htmlFor="personnel-birthdate" className={commonLabelClasses}>出生年月日</label>
+                        <input id="personnel-birthdate" type="date" value={currentItem.birthdate} onChange={e => setCurrentItem(c => ({...c, birthdate: e.target.value}))} className={commonInputClasses}/>
                     </div>
-                    <div>
-                         <label htmlFor="personnel-area" className="block text-sm font-medium text-gray-700">担当区域</label>
+                    <div className="md:col-span-2">
+                         <label htmlFor="personnel-area" className={commonLabelClasses}>担当区域</label>
                          <TagInput id="personnel-area" value={currentItem.area || []} onChange={v => setCurrentItem(c => ({...c, area: v}))} suggestions={allAgentRegions} />
                     </div>
-                    <div className="flex justify-end"><button onClick={handleSave} className="bg-indigo-600 text-white px-4 py-2 rounded-md">保存</button></div>
                 </div>
+                 <div className="flex justify-end pt-8 mt-8 border-t"><button onClick={handleSave} className="bg-indigo-600 text-white px-4 py-2 rounded-md">保存</button></div>
             </Modal>
         </div>
     );
@@ -343,7 +346,7 @@ const CrudManager: React.FC<{
     title: string;
     items: any[];
     setItems: (items: any) => void;
-    fields: { key: string; label: string; type: 'text' | 'number' | 'date' | 'select' | 'textarea'; options?: string[] }[];
+    fields: { key: string; label: string; type: 'text' | 'number' | 'date' | 'select' | 'textarea'; options?: string[]; gridSpan?: string }[];
     displayColumns: string[];
     initialState: any;
     exportFilename: string;
@@ -360,9 +363,9 @@ const CrudManager: React.FC<{
 
     const handleSave = () => {
         if (editingItem) {
-            setItems(items.map(p => p.id === editingItem.id ? currentItem : p));
+            setItems((prev: any[]) => prev.map(p => p.id === editingItem.id ? currentItem : p));
         } else {
-            setItems([...items, { ...currentItem, id: crypto.randomUUID() }]);
+            setItems((prev: any[]) => [...prev, { ...currentItem, id: crypto.randomUUID() }]);
         }
         setIsModalOpen(false);
     };
@@ -391,7 +394,7 @@ const CrudManager: React.FC<{
                                 {displayColumns.map(key => <td key={key} className="p-2 truncate max-w-[100px]">{item[key]}</td>)}
                                 <td className="p-2 text-right">
                                     <button onClick={() => handleOpenModal(item)} className="text-gray-400 hover:text-blue-500 mr-2"><PencilIcon className="w-5 h-5" /></button>
-                                    <button onClick={() => setItems(items.filter(i => i.id !== item.id))} className="text-gray-400 hover:text-red-500"><TrashIcon className="w-5 h-5" /></button>
+                                    <button onClick={() => setItems((prev: any[]) => prev.filter(i => i.id !== item.id))} className="text-gray-400 hover:text-red-500"><TrashIcon className="w-5 h-5" /></button>
                                 </td>
                             </tr>
                         ))}
@@ -399,24 +402,24 @@ const CrudManager: React.FC<{
                 </table>
             </div>
              <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={`${editingItem ? "编辑" : "添加"}${title}`}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
                     {fields.map(field => (
-                        <div key={field.key} className={field.type === 'textarea' ? 'md:col-span-2' : ''}>
-                             <label htmlFor={field.key} className="block text-sm font-medium text-gray-700 mb-1">{field.label}</label>
+                        <div key={field.key} className={field.gridSpan || 'md:col-span-2'}>
+                             <label htmlFor={field.key} className={commonLabelClasses}>{field.label}</label>
                              {field.type === 'select' ? (
-                                <select id={field.key} name={field.key} value={currentItem[field.key] || ''} onChange={e => setCurrentItem(c => ({...c, [field.key]: e.target.value}))} className="mt-1 w-full p-2 border rounded">
+                                <select id={field.key} name={field.key} value={currentItem[field.key] || ''} onChange={e => setCurrentItem(c => ({...c, [field.key]: e.target.value}))} className={commonInputClasses}>
                                     <option value="">请选择</option>
                                     {field.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                                 </select>
                              ) : field.type === 'textarea' ? (
-                                <textarea id={field.key} name={field.key} value={currentItem[field.key] || ''} onChange={e => setCurrentItem(c => ({...c, [field.key]: e.target.value}))} rows={3} className="mt-1 w-full p-2 border rounded"/>
+                                <textarea id={field.key} name={field.key} value={currentItem[field.key] || ''} onChange={e => setCurrentItem(c => ({...c, [field.key]: e.target.value}))} rows={3} className={commonInputClasses}/>
                              ) : (
-                                <input id={field.key} name={field.key} type={field.type} value={currentItem[field.key] || ''} onChange={e => setCurrentItem(c => ({...c, [field.key]: e.target.value}))} className="mt-1 w-full p-2 border rounded"/>
+                                <input id={field.key} name={field.key} type={field.type} value={currentItem[field.key] || ''} onChange={e => setCurrentItem(c => ({...c, [field.key]: e.target.value}))} className={commonInputClasses}/>
                              )}
                         </div>
                     ))}
                 </div>
-                <div className="flex justify-end pt-6"><button onClick={handleSave} className="bg-indigo-600 text-white px-4 py-2 rounded-md">保存</button></div>
+                <div className="flex justify-end pt-8 mt-8 border-t"><button onClick={handleSave} className="bg-indigo-600 text-white px-4 py-2 rounded-md">保存</button></div>
             </Modal>
         </div>
     );
@@ -442,7 +445,7 @@ export const MasterData: React.FC<{
 
     return (
         <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">基础数据维护</h2>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6 pb-4 border-b">基础数据维护</h2>
              <div className="mb-6 border-b border-gray-200">
                 <nav className="-mb-px flex space-x-6" aria-label="Tabs">
                     {tabs.map(tab => (
@@ -461,13 +464,13 @@ export const MasterData: React.FC<{
                  {activeTab === 'import' && <DataImporter {...props} />}
                  {activeTab === 'personnel' && <PersonnelManager personnel={props.personnel} setPersonnel={props.setPersonnel} agents={props.agents} />}
                  {activeTab === 'agents' && <CrudManager title="代理商" items={props.agents} setItems={props.setAgents} initialState={{ 'SS担当': '', '代理区域': '', '代理商': '', '联系人': '', '电话': '', '公司地址': '', '合同日期': '', '代理状态': '合作中', '备考': '' }} displayColumns={['代理商', 'SS担当', '代理区域', '代理状态', '合同日期']} fields={[
-                     { key: '代理商', label: '代理商', type: 'text'}, { key: 'SS担当', label: 'SS担当', type: 'text'}, { key: '代理区域', label: '代理区域', type: 'text'}, { key: '联系人', label: '联系人', type: 'text'}, { key: '电话', label: '电话', type: 'text'}, { key: '合同日期', label: '合同日期', type: 'date'}, { key: '代理状态', label: '代理状态', type: 'select', options: ['合作中', '已终止'] }, { key: '公司地址', label: '公司地址', type: 'textarea'}, { key: '备考', label: '备考', type: 'textarea'},
+                     { key: '代理商', label: '代理商', type: 'text', gridSpan: 'md:col-span-2' }, { key: 'SS担当', label: 'SS担当', type: 'text', gridSpan: 'md:col-span-2' }, { key: '代理区域', label: '代理区域', type: 'text', gridSpan: 'md:col-span-2' }, { key: '联系人', label: '联系人', type: 'text', gridSpan: 'md:col-span-2' }, { key: '电话', label: '电话', type: 'text', gridSpan: 'md:col-span-2' }, { key: '合同日期', label: '合同日期', type: 'date', gridSpan: 'md:col-span-2' }, { key: '代理状态', label: '代理状态', type: 'select', options: ['合作中', '已终止'], gridSpan: 'md:col-span-4' }, { key: '公司地址', label: '公司地址', type: 'textarea', gridSpan: 'md:col-span-4'}, { key: '备考', label: '备考', type: 'textarea', gridSpan: 'md:col-span-4'},
                  ]} exportFilename="agents" />}
                  {activeTab === 'products' && <CrudManager title="产品" items={props.products} setItems={props.setProducts} initialState={{'機種': '', '区分': '', '代理価格': '', '仕切り価格': '', 'オプション': '', '備考': ''}} displayColumns={['機種', '区分', '代理価格', '仕切り価格']} fields={[
-                     { key: '機種', label: '機種', type: 'text'}, { key: '区分', label: '区分', type: 'text'}, { key: '代理価格', label: '代理価格', type: 'number'}, { key: '仕切り価格', label: '仕切り価格', type: 'number'}, { key: 'オプション', label: 'オプション', type: 'textarea'}, { key: '備考', label: '備考', type: 'textarea'},
+                     { key: '機種', label: '機種', type: 'text', gridSpan: 'md:col-span-2' }, { key: '区分', label: '区分', type: 'text', gridSpan: 'md:col-span-2' }, { key: '代理価格', label: '代理価格', type: 'number', gridSpan: 'md:col-span-2' }, { key: '仕切り価格', label: '仕切り価格', type: 'number', gridSpan: 'md:col-span-2' }, { key: 'オプション', label: 'オプション', type: 'textarea', gridSpan: 'md:col-span-4' }, { key: '備考', label: '備考', type: 'textarea', gridSpan: 'md:col-span-4' },
                  ]} exportFilename="products" />}
                  {activeTab === 'customers' && <CrudManager title="客户" items={props.customers} setItems={props.setCustomers} initialState={{ name: '', contact: '' }} displayColumns={['name', 'contact']} fields={[
-                     { key: 'name', label: '客户名称', type: 'text'}, { key: 'contact', label: '联系方式', type: 'text'},
+                     { key: 'name', label: '客户名称', type: 'text', gridSpan: 'md:col-span-2' }, { key: 'contact', label: '联系方式', type: 'text', gridSpan: 'md:col-span-2' },
                  ]} exportFilename="customers" />}
             </div>
         </div>

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import type { Contract, Personnel, Agent, Product } from '../types';
 import { PlusIcon, TrashIcon, ArrowLeftIcon, DownloadIcon } from './common/Icons';
 import { utils, writeFile } from 'xlsx';
+import { Combobox } from './common/Combobox';
 
 const initialContractState: Omit<Contract, 'id'> = {
     '担当': '', '機種': '', '区分': '', '機号': '', '契約日': '',
@@ -10,22 +11,22 @@ const initialContractState: Omit<Contract, 'id'> = {
     '備考①': '', '備考②': '',
 };
 
-const contractFields: { key: keyof Omit<Contract, 'id'>; label: string; type: 'text' | 'date' | 'textarea' | 'number' | 'select' | 'combobox' }[] = [
-    { key: '契約書NO', label: '契約書NO', type: 'text' },
-    { key: '担当', label: '担当', type: 'select' },
-    { key: '代理名称', label: '代理名称', type: 'select' },
-    { key: '機種', label: '機種', type: 'select' },
-    { key: '区分', label: '区分', type: 'text' },
-    { key: '機号', label: '機号', type: 'text' },
-    { key: '契約日', label: '契約日', type: 'date' },
-    { key: '契約状態', label: '契約状態', type: 'combobox' },
-    { key: '出荷指示書№', label: '出荷指示書№', type: 'text' },
-    { key: '契約日付', label: '契約日付', type: 'date' },
-    { key: '単価', label: '単価', type: 'number' },
-    { key: '台数', label: '台数', type: 'number' },
-    { key: '割賦時間', label: '割賦時間', type: 'text' },
-    { key: '備考①', label: '備考①', type: 'textarea' },
-    { key: '備考②', label: '備考②', type: 'textarea' },
+const contractFields: { key: keyof Omit<Contract, 'id'>; label: string; type: 'text' | 'date' | 'textarea' | 'number' | 'select' | 'combobox', gridSpan: string }[] = [
+    { key: '契約書NO', label: '契約書NO', type: 'text', gridSpan: 'md:col-span-3 lg:col-span-2' },
+    { key: '出荷指示書№', label: '出荷指示書№', type: 'text', gridSpan: 'md:col-span-3 lg:col-span-2' },
+    { key: '契約状態', label: '契約状態', type: 'combobox', gridSpan: 'md:col-span-3 lg:col-span-2' },
+    { key: '担当', label: '担当', type: 'select', gridSpan: 'md:col-span-3 lg:col-span-3' },
+    { key: '代理名称', label: '代理名称', type: 'select', gridSpan: 'md:col-span-3 lg:col-span-3' },
+    { key: '機種', label: '機種', type: 'select', gridSpan: 'md:col-span-3 lg:col-span-2' },
+    { key: '区分', label: '区分', type: 'text', gridSpan: 'md:col-span-3 lg:col-span-2' },
+    { key: '機号', label: '機号', type: 'text', gridSpan: 'md:col-span-3 lg:col-span-2' },
+    { key: '契約日', label: '契約日', type: 'date', gridSpan: 'md:col-span-3 lg:col-span-2' },
+    { key: '契約日付', label: '契約日付', type: 'date', gridSpan: 'md:col-span-3 lg:col-span-2' },
+    { key: '単価', label: '単価', type: 'number', gridSpan: 'md:col-span-2 lg:col-span-2' },
+    { key: '台数', label: '台数', type: 'number', gridSpan: 'md:col-span-2 lg:col-span-1' },
+    { key: '割賦時間', label: '割賦時間', type: 'text', gridSpan: 'md:col-span-2 lg:col-span-1' },
+    { key: '備考①', label: '備考①', type: 'textarea', gridSpan: 'md:col-span-6' },
+    { key: '備考②', label: '備考②', type: 'textarea', gridSpan: 'md:col-span-6' },
 ];
 
 const displayColumns: (keyof Contract)[] = ['契約書NO', '担当', '代理名称', '機種', '契約日', '契約状態', '単価', '台数'];
@@ -72,6 +73,9 @@ const exportToCSV = (data: any[], headers: string[], filename: string) => {
         document.body.removeChild(link);
     }
 };
+
+const commonInputClasses = "block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm";
+const commonLabelClasses = "block text-sm font-medium text-gray-700 mb-1";
 
 interface ContractsProps {
     contracts: Contract[];
@@ -124,7 +128,7 @@ export const Contracts: React.FC<ContractsProps> = ({ contracts, setContracts, p
     
     const contractStatusOptions = useMemo(() => {
         const allStatuses = contracts.map(c => c.契約状態).filter(Boolean);
-        return [...new Set(['', '契約ずみ', '貸出契約', ...allStatuses])].sort();
+        return [...new Set(['契約ずみ', '貸出契約', ...allStatuses])].sort();
     }, [contracts]);
 
 
@@ -174,18 +178,20 @@ export const Contracts: React.FC<ContractsProps> = ({ contracts, setContracts, p
             alert('契約書NO is required.');
             return;
         }
-        if (editingId) {
-            setContracts(contracts.map(c => c.id === editingId ? { ...currentContract, id: editingId } : c));
-        } else {
-            setContracts([...contracts, { ...currentContract, id: crypto.randomUUID() }]);
-        }
+        setContracts(prev => {
+            if (editingId) {
+                return prev.map(c => c.id === editingId ? { ...currentContract, id: editingId } : c);
+            } else {
+                return [...prev, { ...currentContract, id: crypto.randomUUID() }];
+            }
+        });
         setView('list');
     };
 
     const handleDeleteSelected = () => {
         if (selectedIds.size === 0) return;
         if (window.confirm(`Are you sure you want to delete ${selectedIds.size} record(s)?`)) {
-            setContracts(contracts.filter(c => !selectedIds.has(c.id)));
+            setContracts(prev => prev.filter(c => !selectedIds.has(c.id)));
             setSelectedIds(new Set());
         }
     };
@@ -199,24 +205,26 @@ export const Contracts: React.FC<ContractsProps> = ({ contracts, setContracts, p
         exportToCSV(filteredContracts, headers, 'contracts.csv');
     };
 
-    const renderFormField = ({ key, label, type }: (typeof contractFields)[0]) => {
+    const renderFormField = ({ key, type }: { key: keyof Omit<Contract, 'id'>, type: string }) => {
         const commonProps = {
             id: key,
             name: key,
             value: currentContract[key] || '',
             onChange: handleInputChange,
-            className: "mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+            className: commonInputClasses
         };
-
+        
         if (type === 'combobox') {
-            const datalistId = `${key}-datalist`;
+            const handleComboboxChange = (newValue: string) => {
+                setCurrentContract(prev => ({ ...prev, [key]: newValue }));
+            };
+
             return (
-                <>
-                    <input list={datalistId} {...commonProps} />
-                    <datalist id={datalistId}>
-                        {contractStatusOptions.map(opt => <option key={opt} value={opt} />)}
-                    </datalist>
-                </>
+                <Combobox
+                    options={contractStatusOptions}
+                    value={currentContract[key] || ''}
+                    onChange={handleComboboxChange}
+                />
             );
         }
 
@@ -251,28 +259,25 @@ export const Contracts: React.FC<ContractsProps> = ({ contracts, setContracts, p
 
     if (view === 'edit') {
         return (
-          <div>
-            <div className="flex justify-between items-center mb-6">
+          <div className="max-w-5xl mx-auto">
+            <div className="flex justify-between items-center mb-6 pb-4 border-b">
               <h2 className="text-3xl font-bold text-gray-800">{editingId ? '编辑合同' : '新建合同'}</h2>
               <button onClick={() => setView('list')} className="flex items-center bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
                 <ArrowLeftIcon className="w-5 h-5 mr-2" />
                 返回列表
               </button>
             </div>
-            <div className="bg-white p-6 rounded-lg shadow">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-                {contractFields.map((field) => {
-                    const fullWidth = field.type === 'textarea';
-                    return (
-                        <div key={field.key} className={fullWidth ? 'md:col-span-2 lg:col-span-3' : ''}>
-                            <label htmlFor={field.key} className="block text-sm font-medium text-gray-700">{field.label}</label>
-                            {renderFormField(field)}
-                        </div>
-                    );
-                })}
+            <div className="bg-white p-8 rounded-lg shadow">
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
+                {contractFields.map((field) => (
+                    <div key={field.key} className={field.gridSpan}>
+                        <label htmlFor={field.key} className={commonLabelClasses}>{field.label}</label>
+                        {renderFormField(field)}
+                    </div>
+                ))}
               </div>
-              <div className="flex justify-end pt-6">
-                <button onClick={handleSubmit} className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">保存</button>
+              <div className="flex justify-end pt-8 mt-8 border-t">
+                <button onClick={handleSubmit} className="bg-indigo-600 text-white px-6 py-2 rounded-md hover:bg-indigo-700">保存</button>
               </div>
             </div>
           </div>
@@ -281,7 +286,7 @@ export const Contracts: React.FC<ContractsProps> = ({ contracts, setContracts, p
 
     return (
         <div>
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-4 pb-4 border-b">
             <h2 className="text-3xl font-bold text-gray-800">合同管理</h2>
             <div className="flex items-center space-x-2">
                 <button onClick={handleCsvExport} className="flex items-center bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
