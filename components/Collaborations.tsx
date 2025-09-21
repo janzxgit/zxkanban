@@ -1,6 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useLocalStorage } from '../hooks/useLocalStorage';
-import type { Collaboration } from '../types';
+import type { Collaboration, Personnel, Agent, Product, Customer } from '../types';
 import { PlusIcon, TrashIcon, ArrowLeftIcon } from './common/Icons';
 
 const initialCollaborationState: Omit<Collaboration, 'id'> = {
@@ -11,15 +10,23 @@ const initialCollaborationState: Omit<Collaboration, 'id'> = {
     '備考①引合詳細、補充内容': '', '備考②引合状況変化記録等': '', '備考③': '',
 };
 
-const collaborationFields: { key: keyof Omit<Collaboration, 'id'>; label: string; type: 'text' | 'date' | 'textarea' | 'number' }[] = [
-    { key: '引合番号', label: '引合番号', type: 'text' }, { key: '担当', label: '担当', type: 'text' },
-    { key: '地域', label: '地域', type: 'text' }, { key: '代理', label: '代理', type: 'text' },
-    { key: '機種', label: '機種', type: 'text' }, { key: '台数', label: '台数', type: 'number' },
-    { key: '顧客情報', label: '顧客情報', type: 'textarea' }, { key: '案件発生年月', label: '案件発生年月', type: 'date' },
-    { key: '访问方式', label: '访问方式', type: 'text' }, { key: '訪問回数', label: '訪問回数', type: 'number' },
-    { key: '確度', label: '確度', type: 'text' }, { key: '確度変更', label: '確度変更', type: 'text' },
-    { key: '確度変更理由', label: '確度変更理由', type: 'textarea' }, { key: '出荷可能時期', label: '出荷可能時期', type: 'date' },
-    { key: '最終結果', label: '最終結果', type: 'text' }, { key: '出荷日(実際）', label: '出荷日(実際）', type: 'date' },
+const collaborationFields: { key: keyof Omit<Collaboration, 'id'>; label: string; type: 'text' | 'date' | 'textarea' | 'number' | 'select' }[] = [
+    { key: '引合番号', label: '引合番号', type: 'text' }, 
+    { key: '担当', label: '担当', type: 'select' },
+    { key: '地域', label: '地域', type: 'text' }, 
+    { key: '代理', label: '代理', type: 'select' },
+    { key: '機種', label: '機種', type: 'select' }, 
+    { key: '台数', label: '台数', type: 'number' },
+    { key: '顧客情報', label: '顧客情報', type: 'select' }, 
+    { key: '案件発生年月', label: '案件発生年月', type: 'date' },
+    { key: '访问方式', label: '访问方式', type: 'text' }, 
+    { key: '訪問回数', label: '訪問回数', type: 'number' },
+    { key: '確度', label: '確度', type: 'text' }, 
+    { key: '確度変更', label: '確度変更', type: 'text' },
+    { key: '確度変更理由', label: '確度変更理由', type: 'textarea' }, 
+    { key: '出荷可能時期', label: '出荷可能時期', type: 'date' },
+    { key: '最終結果', label: '最終結果', type: 'text' }, 
+    { key: '出荷日(実際）', label: '出荷日(実際）', type: 'date' },
     { key: '備考①引合詳細、補充内容', label: '備考①引合詳細、補充内容', type: 'textarea' },
     { key: '備考②引合状況変化記録等', label: '備考②引合状況変化記録等', type: 'textarea' },
     { key: '備考③', label: '備考③', type: 'textarea' },
@@ -29,8 +36,16 @@ const displayColumns: (keyof Collaboration)[] = ['引合番号', '担当', '地�
 const filterKeys: (keyof Collaboration)[] = ['担当', '地域', '代理', '機種', '最終結果'];
 const EMPTY_VALUE_SENTINEL = '__EMPTY_VALUE__';
 
-export const Collaborations: React.FC = () => {
-  const [collaborations, setCollaborations] = useLocalStorage<Collaboration[]>('collaborations', []);
+interface CollaborationsProps {
+    collaborations: Collaboration[];
+    setCollaborations: React.Dispatch<React.SetStateAction<Collaboration[]>>;
+    personnel: Personnel[];
+    agents: Agent[];
+    products: Product[];
+    customers: Customer[];
+}
+
+export const Collaborations: React.FC<CollaborationsProps> = ({ collaborations, setCollaborations, personnel, agents, products, customers }) => {
   const [view, setView] = useState<'list' | 'edit'>('list');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [currentCollaboration, setCurrentCollaboration] = useState<Omit<Collaboration, 'id'>>(initialCollaborationState);
@@ -108,7 +123,7 @@ export const Collaborations: React.FC = () => {
     setView('edit');
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setCurrentCollaboration(prev => ({ ...prev, [name]: value }));
   };
@@ -134,6 +149,48 @@ export const Collaborations: React.FC = () => {
     }
   };
 
+  const renderFormField = ({ key, label, type }: (typeof collaborationFields)[0]) => {
+    const commonProps = {
+        id: key,
+        name: key,
+        value: currentCollaboration[key] || '',
+        onChange: handleInputChange,
+        className: "mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm"
+    };
+
+    if (type === 'select') {
+        let options: { value: string; label: string; }[] = [];
+        switch(key) {
+            case '担当':
+                options = personnel.map(p => ({ value: p.name, label: p.name }));
+                break;
+            case '代理':
+                options = agents.map(a => ({ value: a['代理商'], label: a['代理商'] }));
+                break;
+            case '機種':
+                options = products.map(p => ({ value: p.name, label: p.name }));
+                break;
+            case '顧客情報':
+                options = customers.map(c => ({ value: c.name, label: c.name }));
+                break;
+        }
+
+        return (
+            <select {...commonProps}>
+                <option value="">请选择</option>
+                {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+            </select>
+        );
+    }
+      
+    if (type === 'textarea') {
+      return <textarea {...commonProps} rows={3} />;
+    }
+    
+    return <input type={type} {...commonProps} />;
+  };
+
+
   if (view === 'edit') {
     return (
       <div>
@@ -146,16 +203,12 @@ export const Collaborations: React.FC = () => {
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
-            {collaborationFields.map(({ key, label, type }) => {
-                const fullWidth = type === 'textarea' || ['顧客情報', '備考①引合詳細、補充内容', '備考②引合状況変化記録等', '備考③'].includes(key);
+            {collaborationFields.map((field) => {
+                const fullWidth = field.type === 'textarea' || ['顧客情報', '備考①引合詳細、補充内容', '備考②引合状況変化記録等', '備考③'].includes(field.key);
                 return (
-                    <div key={key} className={fullWidth ? 'md:col-span-2 lg:col-span-3' : ''}>
-                        <label htmlFor={key} className="block text-sm font-medium text-gray-700">{label}</label>
-                        {type === 'textarea' ? (
-                            <textarea id={key} name={key} value={currentCollaboration[key] || ''} onChange={handleInputChange} rows={3} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
-                        ) : (
-                            <input type={type} id={key} name={key} value={currentCollaboration[key] || ''} onChange={handleInputChange} className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm" />
-                        )}
+                    <div key={field.key} className={fullWidth ? 'md:col-span-2 lg:col-span-3' : ''}>
+                        <label htmlFor={field.key} className="block text-sm font-medium text-gray-700">{field.label}</label>
+                        {renderFormField(field)}
                     </div>
                 );
             })}

@@ -7,11 +7,22 @@ import { BusinessTrips } from './components/BusinessTrips';
 import { Meetings } from './components/Meetings';
 import { Collaborations } from './components/Collaborations';
 import { MasterData } from './components/MasterData';
+import { useLocalStorage } from './hooks/useLocalStorage';
+import type { Personnel, Agent, Product, Customer, Collaboration } from './types';
+
 
 type View = 'dashboard' | 'trips' | 'meetings' | 'collaborations' | 'master-data';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('dashboard');
+  
+  // Lifted state for all data
+  const [personnel, setPersonnel] = useLocalStorage<Personnel[]>('personnel', []);
+  const [agents, setAgents] = useLocalStorage<Agent[]>('agents', []);
+  const [products, setProducts] = useLocalStorage<Product[]>('products', []);
+  const [customers, setCustomers] = useLocalStorage<Customer[]>('customers', []);
+  const [collaborations, setCollaborations] = useLocalStorage<Collaboration[]>('collaborations', []);
+
 
   const renderContent = () => {
     switch (currentView) {
@@ -20,11 +31,24 @@ const App: React.FC = () => {
       case 'trips':
         return <BusinessTrips />;
       case 'meetings':
-        return <Meetings />;
+        return <Meetings personnel={personnel} />;
       case 'collaborations':
-        return <Collaborations />;
+        return <Collaborations 
+                    collaborations={collaborations}
+                    setCollaborations={setCollaborations}
+                    personnel={personnel}
+                    agents={agents}
+                    products={products}
+                    customers={customers}
+                />;
       case 'master-data':
-        return <MasterData />;
+        return <MasterData 
+                    personnel={personnel} setPersonnel={setPersonnel}
+                    agents={agents} setAgents={setAgents}
+                    products={products} setProducts={setProducts}
+                    customers={customers} setCustomers={setCustomers}
+                    setCollaborations={setCollaborations}
+                />;
       default:
         return <Dashboard />;
     }
