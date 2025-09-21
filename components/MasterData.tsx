@@ -224,11 +224,13 @@ const PersonnelManager: React.FC<{
 
     const handleSave = () => {
         if (!currentItem.name) return;
-        if (editingItem) {
-            setPersonnel(prev => prev.map(p => p.id === editingItem.id ? { ...currentItem, id: editingItem.id } : p));
-        } else {
-            setPersonnel(prev => [...prev, { ...currentItem, id: crypto.randomUUID() }]);
-        }
+        setPersonnel(prev => {
+            if (editingItem) {
+                return prev.map(p => p.id === editingItem.id ? { ...currentItem, id: editingItem.id } : p);
+            } else {
+                return [...prev, { ...currentItem, id: crypto.randomUUID() }];
+            }
+        });
         setIsModalOpen(false);
     };
 
@@ -444,7 +446,7 @@ export const MasterData: React.FC<{
     ];
 
     return (
-        <div>
+        <div className="max-w-7xl mx-auto">
             <h2 className="text-3xl font-bold text-gray-800 mb-6 pb-4 border-b">基础数据维护</h2>
              <div className="mb-6 border-b border-gray-200">
                 <nav className="-mb-px flex space-x-6" aria-label="Tabs">

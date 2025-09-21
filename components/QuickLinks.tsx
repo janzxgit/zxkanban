@@ -67,7 +67,7 @@ export const QuickLinks: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6 pb-4 border-b">
         <h2 className="text-3xl font-bold text-gray-800">常用链接</h2>
         <div className="flex items-center space-x-2">

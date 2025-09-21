@@ -3,7 +3,7 @@ import { BriefcaseIcon, UserGroupIcon, DocumentTextIcon } from './common/Icons';
 
 export const Dashboard: React.FC = () => {
   return (
-    <div>
+    <div className="max-w-7xl mx-auto">
       <h2 className="text-3xl font-bold text-gray-800 mb-6 pb-4 border-b">仪表盘</h2>
       <div className="bg-white p-6 rounded-lg shadow mb-6">
         <h3 className="text-xl font-semibold text-gray-700">欢迎回来!</h3>

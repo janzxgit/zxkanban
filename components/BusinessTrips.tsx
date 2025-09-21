@@ -85,17 +85,21 @@ export const BusinessTrips: React.FC = () => {
 
   const handleSubmit = () => {
     if (!currentTrip.destination || !currentTrip.startDate || !currentTrip.endDate) return;
-    if (editingTripId) {
-      setTrips(prev => prev.map(t => t.id === editingTripId ? { ...t, ...currentTrip } : t));
-    } else {
-      setTrips(prev => [...prev, { ...currentTrip, id: crypto.randomUUID(), status: 'Planned' }]);
-    }
+    setTrips(prev => {
+        if (editingTripId) {
+            return prev.map(t => t.id === editingTripId ? { ...t, ...currentTrip } : t);
+        } else {
+            return [...prev, { ...currentTrip, id: crypto.randomUUID(), status: 'Planned' }];
+        }
+    });
     setIsModalOpen(false);
   };
 
   const handleReportSubmit = () => {
     if (!editingTripId) return;
-    setTrips(prev => prev.map(t => t.id === editingTripId ? {...t, report: currentReport, status: 'Completed'} : t));
+    setTrips(prev => {
+        return prev.map(t => t.id === editingTripId ? {...t, report: currentReport, status: 'Completed'} : t)
+    });
     setIsReportModalOpen(false);
     setEditingTripId(null);
   };
@@ -126,7 +130,7 @@ export const BusinessTrips: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6 pb-4 border-b">
         <h2 className="text-3xl font-bold text-gray-800">出差管理</h2>
         <div className="flex items-center space-x-2">
