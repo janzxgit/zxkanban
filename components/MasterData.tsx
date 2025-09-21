@@ -2,9 +2,43 @@ import React, { useState, useMemo } from 'react';
 import type { Personnel, Agent, Product, Customer, Collaboration, Contract } from '../types';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import { Modal } from './common/Modal';
-import { PlusIcon, TrashIcon, PencilIcon, CloudUploadIcon, XIcon } from './common/Icons';
+import { PlusIcon, TrashIcon, PencilIcon, CloudUploadIcon, XIcon, DownloadIcon } from './common/Icons';
 
 // --- SHARED UTILS ---
+const exportToCSV = (data: any[], headers: string[], filename: string) => {
+    const escapeCSVValue = (value: any): string => {
+        if (value === null || value === undefined) {
+            return '';
+        }
+        let strValue = Array.isArray(value) ? value.join('; ') : String(value);
+        if (strValue.includes(',') || strValue.includes('"') || strValue.includes('\n')) {
+            strValue = strValue.replace(/"/g, '""');
+            return `"${strValue}"`;
+        }
+        return strValue;
+    };
+
+    const csvRows = [
+        headers.join(','),
+        ...data.map(row => 
+            headers.map(header => escapeCSVValue(row[header])).join(',')
+        )
+    ];
+
+    const csvString = '\uFEFF' + csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+};
+
 const parseCSV = (text: string): string[][] => {
   const result: string[][] = [];
   let currentLine: string[] = [];
@@ -200,6 +234,11 @@ const PersonnelManager: React.FC<{
         const age = new Date().getFullYear() - new Date(birthdate).getFullYear();
         return age > 0 ? `${age}岁` : '';
     };
+
+    const handleExport = () => {
+        const headers = ['id', 'name', 'position', 'birthdate', 'area'];
+        exportToCSV(personnel, headers, 'personnel.csv');
+    };
     
     const TagInput: React.FC<{ value: string[]; onChange: (value: string[]) => void; suggestions: string[]; id: string; }> = ({ value, onChange, suggestions, id }) => {
         const [inputValue, setInputValue] = useState('');
@@ -250,9 +289,14 @@ const PersonnelManager: React.FC<{
 
     return (
         <div>
-            <button onClick={() => handleOpenModal()} className="w-full flex justify-center items-center bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 mb-4">
-                <PlusIcon className="w-5 h-5 mr-2" /> 添加担当
-            </button>
+            <div className="flex items-center space-x-2 mb-4">
+                <button onClick={handleExport} className="flex-1 flex justify-center items-center bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
+                    <DownloadIcon className="w-5 h-5 mr-2" /> 导出
+                </button>
+                <button onClick={() => handleOpenModal()} className="flex-1 flex justify-center items-center bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+                    <PlusIcon className="w-5 h-5 mr-2" /> 添加担当
+                </button>
+            </div>
             <div className="space-y-2 max-h-80 overflow-y-auto">
                 {personnel.map(p => (
                     <div key={p.id} className="flex justify-between items-center p-2 bg-gray-50 rounded-md">
@@ -302,7 +346,8 @@ const CrudManager: React.FC<{
     fields: { key: string; label: string; type: 'text' | 'number' | 'date' | 'select' | 'textarea'; options?: string[] }[];
     displayColumns: string[];
     initialState: any;
-}> = ({ title, items, setItems, fields, displayColumns, initialState }) => {
+    exportFilename: string;
+}> = ({ title, items, setItems, fields, displayColumns, initialState, exportFilename }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<any | null>(null);
     const [currentItem, setCurrentItem] = useState(initialState);
@@ -322,11 +367,21 @@ const CrudManager: React.FC<{
         setIsModalOpen(false);
     };
 
+    const handleExport = () => {
+        const headers = ['id', ...fields.map(f => f.key)];
+        exportToCSV(items, headers, `${exportFilename}.csv`);
+    };
+
     return (
         <div>
-            <button onClick={() => handleOpenModal()} className="w-full flex justify-center items-center bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 mb-4">
-                <PlusIcon className="w-5 h-5 mr-2" /> 添加{title}
-            </button>
+            <div className="flex items-center space-x-2 mb-4">
+                <button onClick={handleExport} className="flex-1 flex justify-center items-center bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
+                    <DownloadIcon className="w-5 h-5 mr-2" /> 导出
+                </button>
+                <button onClick={() => handleOpenModal()} className="flex-1 flex justify-center items-center bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+                    <PlusIcon className="w-5 h-5 mr-2" /> 添加{title}
+                </button>
+            </div>
             <div className="space-y-2 max-h-80 overflow-y-auto">
                 <table className="min-w-full text-sm">
                     <thead className="bg-gray-100"><tr>{displayColumns.map(k => <th key={k} className="p-2 text-left font-medium">{k}</th>)}<th/></tr></thead>
@@ -407,13 +462,13 @@ export const MasterData: React.FC<{
                  {activeTab === 'personnel' && <PersonnelManager personnel={props.personnel} setPersonnel={props.setPersonnel} agents={props.agents} />}
                  {activeTab === 'agents' && <CrudManager title="代理商" items={props.agents} setItems={props.setAgents} initialState={{ 'SS担当': '', '代理区域': '', '代理商': '', '联系人': '', '电话': '', '公司地址': '', '合同日期': '', '代理状态': '合作中', '备考': '' }} displayColumns={['代理商', 'SS担当', '代理区域', '代理状态', '合同日期']} fields={[
                      { key: '代理商', label: '代理商', type: 'text'}, { key: 'SS担当', label: 'SS担当', type: 'text'}, { key: '代理区域', label: '代理区域', type: 'text'}, { key: '联系人', label: '联系人', type: 'text'}, { key: '电话', label: '电话', type: 'text'}, { key: '合同日期', label: '合同日期', type: 'date'}, { key: '代理状态', label: '代理状态', type: 'select', options: ['合作中', '已终止'] }, { key: '公司地址', label: '公司地址', type: 'textarea'}, { key: '备考', label: '备考', type: 'textarea'},
-                 ]} />}
+                 ]} exportFilename="agents" />}
                  {activeTab === 'products' && <CrudManager title="产品" items={props.products} setItems={props.setProducts} initialState={{'機種': '', '区分': '', '代理価格': '', '仕切り価格': '', 'オプション': '', '備考': ''}} displayColumns={['機種', '区分', '代理価格', '仕切り価格']} fields={[
                      { key: '機種', label: '機種', type: 'text'}, { key: '区分', label: '区分', type: 'text'}, { key: '代理価格', label: '代理価格', type: 'number'}, { key: '仕切り価格', label: '仕切り価格', type: 'number'}, { key: 'オプション', label: 'オプション', type: 'textarea'}, { key: '備考', label: '備考', type: 'textarea'},
-                 ]} />}
+                 ]} exportFilename="products" />}
                  {activeTab === 'customers' && <CrudManager title="客户" items={props.customers} setItems={props.setCustomers} initialState={{ name: '', contact: '' }} displayColumns={['name', 'contact']} fields={[
                      { key: 'name', label: '客户名称', type: 'text'}, { key: 'contact', label: '联系方式', type: 'text'},
-                 ]} />}
+                 ]} exportFilename="customers" />}
             </div>
         </div>
     );

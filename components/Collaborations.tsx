@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import type { Collaboration, Personnel, Agent, Product, Customer } from '../types';
-import { PlusIcon, TrashIcon, ArrowLeftIcon } from './common/Icons';
+import { PlusIcon, TrashIcon, ArrowLeftIcon, DownloadIcon } from './common/Icons';
+import { utils, writeFile } from 'xlsx';
 
 const initialCollaborationState: Omit<Collaboration, 'id'> = {
     '引合番号': '', '担当': '', '地域': '', '代理': '', '機種': '',
@@ -35,6 +36,48 @@ const collaborationFields: { key: keyof Omit<Collaboration, 'id'>; label: string
 const displayColumns: (keyof Collaboration)[] = ['引合番号', '担当', '地域', '代理', '機種', '台数', '顧客情報', '確度', '出荷可能時期', '最終結果', '出荷日(実際）', '備考①引合詳細、補充内容', '備考②引合状況変化記録等'];
 const filterKeys: (keyof Collaboration)[] = ['担当', '地域', '代理', '機種', '最終結果', '出荷日(実際）'];
 const EMPTY_VALUE_SENTINEL = '__EMPTY_VALUE__';
+
+const exportToExcel = (data: any[], filename: string) => {
+    const ws = utils.json_to_sheet(data);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Data");
+    writeFile(wb, filename);
+};
+
+const exportToCSV = (data: any[], headers: string[], filename: string) => {
+    const escapeCSVValue = (value: any): string => {
+        if (value === null || value === undefined) {
+            return '';
+        }
+        let strValue = Array.isArray(value) ? value.join('; ') : String(value);
+        if (strValue.includes(',') || strValue.includes('"') || strValue.includes('\n')) {
+            strValue = strValue.replace(/"/g, '""');
+            return `"${strValue}"`;
+        }
+        return strValue;
+    };
+
+    const csvRows = [
+        headers.join(','),
+        ...data.map(row => 
+            headers.map(header => escapeCSVValue(row[header])).join(',')
+        )
+    ];
+
+    const csvString = '\uFEFF' + csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+};
+
 
 interface CollaborationsProps {
     collaborations: Collaboration[];
@@ -148,6 +191,15 @@ export const Collaborations: React.FC<CollaborationsProps> = ({ collaborations, 
       setSelectedIds(new Set());
     }
   };
+  
+  const handleExcelExport = () => {
+    exportToExcel(filteredCollaborations, 'collaborations.xlsx');
+  };
+
+  const handleCsvExport = () => {
+    const headers = collaborationFields.map(f => f.key);
+    exportToCSV(filteredCollaborations, headers, 'collaborations.csv');
+  };
 
   const renderFormField = ({ key, label, type }: (typeof collaborationFields)[0]) => {
     const commonProps = {
@@ -226,6 +278,14 @@ export const Collaborations: React.FC<CollaborationsProps> = ({ collaborations, 
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-3xl font-bold text-gray-800">引合记录管理</h2>
         <div className="flex items-center space-x-2">
+            <button onClick={handleCsvExport} className="flex items-center bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
+                <DownloadIcon className="w-5 h-5 mr-2" />
+                导出CSV
+            </button>
+            <button onClick={handleExcelExport} className="flex items-center bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                <DownloadIcon className="w-5 h-5 mr-2" />
+                导出Excel
+            </button>
             {selectedIds.size > 0 && (
                 <button onClick={handleDeleteSelected} className="flex items-center bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
                     <TrashIcon className="w-5 h-5 mr-2" />

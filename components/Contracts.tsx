@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import type { Contract, Personnel, Agent, Product } from '../types';
-import { PlusIcon, TrashIcon, ArrowLeftIcon } from './common/Icons';
+import { PlusIcon, TrashIcon, ArrowLeftIcon, DownloadIcon } from './common/Icons';
+import { utils, writeFile } from 'xlsx';
 
 const initialContractState: Omit<Contract, 'id'> = {
     '担当': '', '機種': '', '区分': '', '機号': '', '契約日': '',
@@ -30,6 +31,47 @@ const contractFields: { key: keyof Omit<Contract, 'id'>; label: string; type: 't
 const displayColumns: (keyof Contract)[] = ['契約書NO', '担当', '代理名称', '機種', '契約日', '契約状態', '単価', '台数'];
 const filterKeys: (keyof Contract)[] = ['担当', '代理名称', '機種', '契約状態'];
 const EMPTY_VALUE_SENTINEL = '__EMPTY_VALUE__';
+
+const exportToExcel = (data: any[], filename: string) => {
+    const ws = utils.json_to_sheet(data);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Data");
+    writeFile(wb, filename);
+};
+
+const exportToCSV = (data: any[], headers: string[], filename: string) => {
+    const escapeCSVValue = (value: any): string => {
+        if (value === null || value === undefined) {
+            return '';
+        }
+        let strValue = Array.isArray(value) ? value.join('; ') : String(value);
+        if (strValue.includes(',') || strValue.includes('"') || strValue.includes('\n')) {
+            strValue = strValue.replace(/"/g, '""');
+            return `"${strValue}"`;
+        }
+        return strValue;
+    };
+
+    const csvRows = [
+        headers.join(','),
+        ...data.map(row => 
+            headers.map(header => escapeCSVValue(row[header])).join(',')
+        )
+    ];
+
+    const csvString = '\uFEFF' + csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+};
 
 interface ContractsProps {
     contracts: Contract[];
@@ -142,6 +184,15 @@ export const Contracts: React.FC<ContractsProps> = ({ contracts, setContracts, p
             setSelectedIds(new Set());
         }
     };
+    
+    const handleExcelExport = () => {
+        exportToExcel(filteredContracts, 'contracts.xlsx');
+    };
+
+    const handleCsvExport = () => {
+        const headers = contractFields.map(f => f.key);
+        exportToCSV(filteredContracts, headers, 'contracts.csv');
+    };
 
     const renderFormField = ({ key, label, type }: (typeof contractFields)[0]) => {
         const commonProps = {
@@ -216,6 +267,14 @@ export const Contracts: React.FC<ContractsProps> = ({ contracts, setContracts, p
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-3xl font-bold text-gray-800">合同管理</h2>
             <div className="flex items-center space-x-2">
+                <button onClick={handleCsvExport} className="flex items-center bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700">
+                    <DownloadIcon className="w-5 h-5 mr-2" />
+                    导出CSV
+                </button>
+                <button onClick={handleExcelExport} className="flex items-center bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                    <DownloadIcon className="w-5 h-5 mr-2" />
+                    导出Excel
+                </button>
                 {selectedIds.size > 0 && (
                     <button onClick={handleDeleteSelected} className="flex items-center bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
                         <TrashIcon className="w-5 h-5 mr-2" />

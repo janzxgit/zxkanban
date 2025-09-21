@@ -2,10 +2,44 @@ import React, { useState, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import type { BusinessTrip, TripReport } from '../types';
 import { Modal } from './common/Modal';
-import { PlusIcon, TrashIcon, PencilIcon, ChevronDownIcon } from './common/Icons';
+import { PlusIcon, TrashIcon, PencilIcon, ChevronDownIcon, DownloadIcon } from './common/Icons';
 
 const initialTripState: Omit<BusinessTrip, 'id' | 'status' | 'report'> = { destination: '', startDate: '', endDate: '', purpose: '' };
 const initialReportState: TripReport = { content: '', achievements: '', issues: '', expenses: 0 };
+
+const exportToCSV = (data: any[], headers: string[], filename: string) => {
+    const escapeCSVValue = (value: any): string => {
+        if (value === null || value === undefined) {
+            return '';
+        }
+        let strValue = Array.isArray(value) ? value.join('; ') : String(value);
+        if (strValue.includes(',') || strValue.includes('"') || strValue.includes('\n')) {
+            strValue = strValue.replace(/"/g, '""');
+            return `"${strValue}"`;
+        }
+        return strValue;
+    };
+
+    const csvRows = [
+        headers.join(','),
+        ...data.map(row => 
+            headers.map(header => escapeCSVValue(row[header])).join(',')
+        )
+    ];
+
+    const csvString = '\uFEFF' + csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+};
 
 export const BusinessTrips: React.FC = () => {
   const [trips, setTrips] = useLocalStorage<BusinessTrip[]>('businessTrips', []);
@@ -70,14 +104,37 @@ export const BusinessTrips: React.FC = () => {
     return [...trips].sort((a, b) => new Date(b.startDate).getTime() - new Date(a.startDate).getTime());
   }, [trips]);
 
+  const handleExport = () => {
+    const flattenedData = sortedTrips.map(trip => ({
+        id: trip.id,
+        destination: trip.destination,
+        startDate: trip.startDate,
+        endDate: trip.endDate,
+        purpose: trip.purpose,
+        status: trip.status,
+        report_content: trip.report?.content || '',
+        report_achievements: trip.report?.achievements || '',
+        report_issues: trip.report?.issues || '',
+        report_expenses: trip.report?.expenses || 0,
+    }));
+    const headers = ['id', 'destination', 'startDate', 'endDate', 'purpose', 'status', 'report_content', 'report_achievements', 'report_issues', 'report_expenses'];
+    exportToCSV(flattenedData, headers, 'business-trips.csv');
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-gray-800">出差管理</h2>
-        <button onClick={openAddModal} className="flex items-center bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-200 shadow-sm">
-          <PlusIcon className="w-5 h-5 mr-2" />
-          新建出差申请
-        </button>
+        <div className="flex items-center space-x-2">
+            <button onClick={handleExport} className="flex items-center bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition duration-200 shadow-sm">
+                <DownloadIcon className="w-5 h-5 mr-2" />
+                导出CSV
+            </button>
+            <button onClick={openAddModal} className="flex items-center bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-200 shadow-sm">
+            <PlusIcon className="w-5 h-5 mr-2" />
+            新建出差申请
+            </button>
+        </div>
       </div>
       
       <div className="bg-white rounded-lg shadow overflow-hidden">

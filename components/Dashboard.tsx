@@ -1,9 +1,43 @@
-
 import React, { useState } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import type { QuickLink } from '../types';
 import { Modal } from './common/Modal';
-import { PlusIcon, TrashIcon, ExternalLinkIcon } from './common/Icons';
+import { PlusIcon, TrashIcon, ExternalLinkIcon, DownloadIcon } from './common/Icons';
+
+const exportToCSV = (data: any[], headers: string[], filename: string) => {
+    const escapeCSVValue = (value: any): string => {
+        if (value === null || value === undefined) {
+            return '';
+        }
+        let strValue = Array.isArray(value) ? value.join('; ') : String(value);
+        if (strValue.includes(',') || strValue.includes('"') || strValue.includes('\n')) {
+            strValue = strValue.replace(/"/g, '""');
+            return `"${strValue}"`;
+        }
+        return strValue;
+    };
+
+    const csvRows = [
+        headers.join(','),
+        ...data.map(row => 
+            headers.map(header => escapeCSVValue(row[header])).join(',')
+        )
+    ];
+
+    const csvString = '\uFEFF' + csvRows.join('\n');
+    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+};
+
 
 export const Dashboard: React.FC = () => {
   const [links, setLinks] = useLocalStorage<QuickLink[]>('quickLinks', []);
@@ -27,17 +61,31 @@ export const Dashboard: React.FC = () => {
     setNewLink(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleExport = () => {
+    const headers = ['id', 'title', 'url', 'description'];
+    exportToCSV(links, headers, 'quick-links.csv');
+  };
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold text-gray-800">导航与常用链接</h2>
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="flex items-center bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-200 shadow-sm"
-        >
-          <PlusIcon className="w-5 h-5 mr-2" />
-          添加链接
-        </button>
+        <div className="flex items-center space-x-2">
+            <button
+                onClick={handleExport}
+                className="flex items-center bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition duration-200 shadow-sm"
+            >
+                <DownloadIcon className="w-5 h-5 mr-2" />
+                导出CSV
+            </button>
+            <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-200 shadow-sm"
+            >
+            <PlusIcon className="w-5 h-5 mr-2" />
+            添加链接
+            </button>
+        </div>
       </div>
 
       {links.length === 0 ? (

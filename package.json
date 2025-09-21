@@ -12,7 +12,10 @@
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-markdown": "9",
-    "remark-gfm": "4"
+    "remark-gfm": "4",
+    "xlsx": "latest",
+    "jspdf": "2.5.1",
+    "html2canvas": "1.4.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
