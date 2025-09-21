@@ -143,12 +143,21 @@ export const Meetings: React.FC<MeetingsProps> = ({ personnel }) => {
         </div>
         <div className="bg-white p-6 rounded-lg shadow space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <input name="title" value={currentMeeting.title} onChange={handleInputChange} placeholder="会议主题" className="w-full p-2 border rounded"/>
-                <input name="date" type="date" value={currentMeeting.date} onChange={handleInputChange} className="w-full p-2 border rounded"/>
+                <div>
+                  <label htmlFor="meeting-title" className="block text-sm font-medium text-gray-700">会议主题</label>
+                  <input id="meeting-title" name="title" value={currentMeeting.title} onChange={handleInputChange} placeholder="会议主题" className="mt-1 w-full p-2 border rounded"/>
+                </div>
+                <div>
+                  <label htmlFor="meeting-date" className="block text-sm font-medium text-gray-700">会议日期</label>
+                  <input id="meeting-date" name="date" type="date" value={currentMeeting.date} onChange={handleInputChange} className="mt-1 w-full p-2 border rounded"/>
+                </div>
             </div>
-            <textarea name="attendees" value={currentMeeting.attendees} onChange={handleInputChange} placeholder="参会人员 (用逗号分隔)" rows={2} className="w-full p-2 border rounded"/>
+            <div>
+              <label htmlFor="meeting-attendees" className="block text-sm font-medium text-gray-700">参会人员</label>
+              <textarea id="meeting-attendees" name="attendees" value={currentMeeting.attendees} onChange={handleInputChange} placeholder="参会人员 (用逗号分隔)" rows={2} className="mt-1 w-full p-2 border rounded"/>
+            </div>
             {personnel.length > 0 && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 items-center">
                     <span className="text-sm font-medium text-gray-600 self-center">快速添加:</span>
                     {personnel.map(p => (
                         <button key={p.id} onClick={() => addAttendee(p.name)} className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm hover:bg-gray-300">

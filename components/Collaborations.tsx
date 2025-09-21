@@ -33,7 +33,7 @@ const collaborationFields: { key: keyof Omit<Collaboration, 'id'>; label: string
 ];
 
 const displayColumns: (keyof Collaboration)[] = ['引合番号', '担当', '地域', '代理', '機種', '台数', '顧客情報', '確度', '出荷可能時期', '最終結果', '出荷日(実際）', '備考①引合詳細、補充内容', '備考②引合状況変化記録等'];
-const filterKeys: (keyof Collaboration)[] = ['担当', '地域', '代理', '機種', '最終結果'];
+const filterKeys: (keyof Collaboration)[] = ['担当', '地域', '代理', '機種', '最終結果', '出荷日(実際）'];
 const EMPTY_VALUE_SENTINEL = '__EMPTY_VALUE__';
 
 interface CollaborationsProps {
@@ -168,7 +168,7 @@ export const Collaborations: React.FC<CollaborationsProps> = ({ collaborations, 
                 options = agents.map(a => ({ value: a['代理商'], label: a['代理商'] }));
                 break;
             case '機種':
-                options = products.map(p => ({ value: p.name, label: p.name }));
+                options = products.map(p => ({ value: p['機種'], label: p['機種'] }));
                 break;
             case '顧客情報':
                 options = customers.map(c => ({ value: c.name, label: c.name }));
@@ -240,7 +240,7 @@ export const Collaborations: React.FC<CollaborationsProps> = ({ collaborations, 
       </div>
       
       <div className="bg-white p-4 rounded-lg shadow mb-6">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
             {filterKeys.map(key => (
                 <div key={key}>
                     <label htmlFor={`filter-${key}`} className="text-sm font-medium text-gray-700">{key}</label>
@@ -260,9 +260,8 @@ export const Collaborations: React.FC<CollaborationsProps> = ({ collaborations, 
                     </select>
                 </div>
             ))}
-            <div>
-                 <label className="block text-sm font-medium text-gray-700 opacity-0">Reset</label>
-                 <button onClick={resetFilters} className="mt-1 w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 text-sm">重置过滤</button>
+            <div className="flex items-end">
+                 <button onClick={resetFilters} className="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 text-sm">重置过滤</button>
             </div>
         </div>
       </div>

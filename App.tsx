@@ -1,5 +1,7 @@
-// Fix: Implement the main App component with state management for view navigation and layout.
 import React, { useState } from 'react';
+import { useLocalStorage } from './hooks/useLocalStorage';
+import type { Collaboration, Personnel, Agent, Product, Customer, Contract, Meeting, BusinessTrip } from './types';
+
 import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { Dashboard } from './components/Dashboard';
@@ -7,47 +9,59 @@ import { BusinessTrips } from './components/BusinessTrips';
 import { Meetings } from './components/Meetings';
 import { Collaborations } from './components/Collaborations';
 import { MasterData } from './components/MasterData';
-import { useLocalStorage } from './hooks/useLocalStorage';
-import type { Personnel, Agent, Product, Customer, Collaboration } from './types';
+import { Contracts } from './components/Contracts';
 
-
-type View = 'dashboard' | 'trips' | 'meetings' | 'collaborations' | 'master-data';
+export type View = 'dashboard' | 'business-trips' | 'meetings' | 'collaborations' | 'contracts' | 'master-data';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<View>('dashboard');
-  
-  // Lifted state for all data
+
+  // Master Data State
   const [personnel, setPersonnel] = useLocalStorage<Personnel[]>('personnel', []);
   const [agents, setAgents] = useLocalStorage<Agent[]>('agents', []);
   const [products, setProducts] = useLocalStorage<Product[]>('products', []);
   const [customers, setCustomers] = useLocalStorage<Customer[]>('customers', []);
+
+  // Module-specific State
   const [collaborations, setCollaborations] = useLocalStorage<Collaboration[]>('collaborations', []);
+  const [contracts, setContracts] = useLocalStorage<Contract[]>('contracts', []);
+  const [meetings, setMeetings] = useLocalStorage<Meeting[]>('meetings', []);
+  const [trips, setTrips] = useLocalStorage<BusinessTrip[]>('businessTrips', []);
 
 
   const renderContent = () => {
     switch (currentView) {
       case 'dashboard':
         return <Dashboard />;
-      case 'trips':
+      case 'business-trips':
         return <BusinessTrips />;
       case 'meetings':
         return <Meetings personnel={personnel} />;
       case 'collaborations':
         return <Collaborations 
-                    collaborations={collaborations}
-                    setCollaborations={setCollaborations}
-                    personnel={personnel}
-                    agents={agents}
-                    products={products}
-                    customers={customers}
+                  collaborations={collaborations}
+                  setCollaborations={setCollaborations}
+                  personnel={personnel}
+                  agents={agents}
+                  products={products}
+                  customers={customers}
+                />;
+      case 'contracts':
+        return <Contracts 
+                  contracts={contracts}
+                  setContracts={setContracts}
+                  personnel={personnel}
+                  agents={agents}
+                  products={products}
                 />;
       case 'master-data':
         return <MasterData 
-                    personnel={personnel} setPersonnel={setPersonnel}
-                    agents={agents} setAgents={setAgents}
-                    products={products} setProducts={setProducts}
-                    customers={customers} setCustomers={setCustomers}
-                    setCollaborations={setCollaborations}
+                  personnel={personnel} setPersonnel={setPersonnel}
+                  agents={agents} setAgents={setAgents}
+                  products={products} setProducts={setProducts}
+                  customers={customers} setCustomers={setCustomers}
+                  setCollaborations={setCollaborations}
+                  setContracts={setContracts}
                 />;
       default:
         return <Dashboard />;

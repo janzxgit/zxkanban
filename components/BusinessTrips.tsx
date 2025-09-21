@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useLocalStorage } from '../hooks/useLocalStorage';
 import type { BusinessTrip, TripReport } from '../types';
@@ -129,10 +128,22 @@ export const BusinessTrips: React.FC = () => {
       {/* Trip Application Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title={editingTripId ? "编辑出差申请" : "新建出差申请"}>
         <div className="space-y-4">
-          <input name="destination" value={currentTrip.destination} onChange={handleInputChange} placeholder="目的地" className="w-full p-2 border rounded"/>
-          <input name="startDate" type="date" value={currentTrip.startDate} onChange={handleInputChange} className="w-full p-2 border rounded"/>
-          <input name="endDate" type="date" value={currentTrip.endDate} onChange={handleInputChange} className="w-full p-2 border rounded"/>
-          <textarea name="purpose" value={currentTrip.purpose} onChange={handleInputChange} placeholder="出差事由" rows={4} className="w-full p-2 border rounded"/>
+          <div>
+            <label htmlFor="destination" className="block text-sm font-medium text-gray-700">目的地</label>
+            <input id="destination" name="destination" value={currentTrip.destination} onChange={handleInputChange} placeholder="目的地" className="mt-1 w-full p-2 border rounded"/>
+          </div>
+          <div>
+            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700">开始日期</label>
+            <input id="startDate" name="startDate" type="date" value={currentTrip.startDate} onChange={handleInputChange} className="mt-1 w-full p-2 border rounded"/>
+          </div>
+          <div>
+            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700">结束日期</label>
+            <input id="endDate" name="endDate" type="date" value={currentTrip.endDate} onChange={handleInputChange} className="mt-1 w-full p-2 border rounded"/>
+          </div>
+          <div>
+            <label htmlFor="purpose" className="block text-sm font-medium text-gray-700">出差事由</label>
+            <textarea id="purpose" name="purpose" value={currentTrip.purpose} onChange={handleInputChange} placeholder="出差事由" rows={4} className="mt-1 w-full p-2 border rounded"/>
+          </div>
           <div className="flex justify-end"><button onClick={handleSubmit} className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">保存</button></div>
         </div>
       </Modal>
@@ -140,10 +151,22 @@ export const BusinessTrips: React.FC = () => {
       {/* Trip Report Modal */}
       <Modal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} title="撰写/编辑出差报告">
         <div className="space-y-4">
-          <textarea name="content" value={currentReport.content} onChange={handleReportChange} placeholder="工作内容" rows={3} className="w-full p-2 border rounded"/>
-          <textarea name="achievements" value={currentReport.achievements} onChange={handleReportChange} placeholder="成果" rows={3} className="w-full p-2 border rounded"/>
-          <textarea name="issues" value={currentReport.issues} onChange={handleReportChange} placeholder="遇到的问题" rows={3} className="w-full p-2 border rounded"/>
-          <input name="expenses" type="number" value={currentReport.expenses} onChange={handleReportChange} placeholder="费用情况" className="w-full p-2 border rounded"/>
+          <div>
+            <label htmlFor="content" className="block text-sm font-medium text-gray-700">工作内容</label>
+            <textarea id="content" name="content" value={currentReport.content} onChange={handleReportChange} placeholder="工作内容" rows={3} className="mt-1 w-full p-2 border rounded"/>
+          </div>
+          <div>
+            <label htmlFor="achievements" className="block text-sm font-medium text-gray-700">成果</label>
+            <textarea id="achievements" name="achievements" value={currentReport.achievements} onChange={handleReportChange} placeholder="成果" rows={3} className="mt-1 w-full p-2 border rounded"/>
+          </div>
+          <div>
+            <label htmlFor="issues" className="block text-sm font-medium text-gray-700">遇到的问题</label>
+            <textarea id="issues" name="issues" value={currentReport.issues} onChange={handleReportChange} placeholder="遇到的问题" rows={3} className="mt-1 w-full p-2 border rounded"/>
+          </div>
+          <div>
+            <label htmlFor="expenses" className="block text-sm font-medium text-gray-700">费用情况</label>
+            <input id="expenses" name="expenses" type="number" value={currentReport.expenses} onChange={handleReportChange} placeholder="费用情况" className="mt-1 w-full p-2 border rounded"/>
+          </div>
           <div className="flex justify-end"><button onClick={handleReportSubmit} className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">保存报告</button></div>
         </div>
       </Modal>
